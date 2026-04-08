@@ -27,6 +27,49 @@ Para ejecutar y contribuir a este proyecto en un entorno local, necesitas tener 
 - **Elixir & Erlang:** (Recomendado vía gestores de versiones como `asdf` utilizando las versiones declaradas en `.tool-versions`).
 - **Docker y Docker Compose:** Para ejecutar la base de datos de manera aislada sin necesidad de instalar un binario de MongoDB local.
 
+## Referencia de Modelos y Servicios
+
+A medida que el proyecto crezca, el diccionario de dominio se documentará aquí:
+
+### Modelos de Dominio
+- **User (`WeatherFlow.Domain.User`)**: 
+  Representa a un miembro o administrador de la plataforma. 
+  *Atributos*: `id` (String Hex), `first_name` (String), `last_name` (String), `email` (String). 
+  *Invariantes de negocio*: El modelo debe construirse con todos los atributos obligatorios completos. A nivel infraestructura, no pueden existir dos perfiles con el mismo e-mail.
+
+### Servicios Orquestadores
+- **UserManagementService**: 
+  * `register_user(attrs)`: Valida requisitos, invoca persistencia y actúa como escudo atrapando proactivamente los errores del motor BSON por e-mails duplicados para retornar mensajes limpios de dominio.
+  * `get_user(id)`: Retorna una entidad o `{:error, :not_found}`. Es resiliente ante formatos de ID inválidos.
+  * `list_users()`: Recupera la colección completa de usuarios mapeada de base de datos a Entidades de Dominio puras.
+
+## Guía de Uso de la API (Ejemplos Rápidos)
+
+Nuestra REST API puede experimentarse cómodamente y visualizarse interactivamente navegando a **`http://localhost:4000/api/swaggerui`**. Alternativamente, te dejamos las sentencias curl de terminal:
+
+### 1. Registrar un Usuario (POST `/api/users/`)
+```bash
+curl -X POST http://localhost:4000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user": {
+      "first_name": "Ada",
+      "last_name": "Lovelace",
+      "email": "ada@lovelace.com"
+    }
+  }'
+```
+
+### 2. Listar todos los Usuarios (GET `/api/users/`)
+```bash
+curl -X GET http://localhost:4000/api/users
+```
+
+### 3. Obtener Usuario por ID (GET `/api/users/:id`)
+```bash
+curl -X GET http://localhost:4000/api/users/66144e5b3dc8a6efb349b1a1
+```
+
 ## Configuración y Ejecución Local
 
 1. **Levantar la base de datos (MongoDB local):**

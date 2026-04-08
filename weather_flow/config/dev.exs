@@ -15,11 +15,10 @@ config :weather_flow, WeatherFlowWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "HcsJ2cgFRL4RoK6uHwMigeD08noavi2XjaqeKEnXcKDjYCr/Ygu2HTdXIgQslJxc",
   watchers: []
-
 config :weather_flow, :mongo,
   database: "weather_flow_dev",
-  url: "mongodb://root:example@localhost:27017",
-  pool_size: 2
+  url: "mongodb://localhost:27017",
+  pool_size: 10
 
 # ## SSL Support
 #

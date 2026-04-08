@@ -9,7 +9,7 @@ config :weather_flow, WeatherFlowWeb.Endpoint,
 
 config :weather_flow, :mongo,
   database: "weather_flow_test",
-  url: "mongodb://root:example@localhost:27017",
+  url: "mongodb://localhost:27017",
   pool_size: 1
 
 # Print only warnings and errors during test

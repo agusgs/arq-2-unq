@@ -3,10 +3,22 @@ defmodule WeatherFlowWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug OpenApiSpex.Plug.PutApiSpec, module: WeatherFlowWeb.ApiSpec
   end
 
   scope "/api", WeatherFlowWeb do
     pipe_through :api
+
+    get "/users", UserController, :index
+    post "/users", UserController, :create
+  end
+
+  # Swagger UI y Spec Routes
+  scope "/api" do
+    pipe_through :api
+
+    get "/openapi", OpenApiSpex.Plug.RenderSpec, [default: WeatherFlowWeb.ApiSpec]
+    get "/swaggerui", OpenApiSpex.Plug.SwaggerUI, path: "/api/openapi"
   end
 
   # Enable LiveDashboard in development
