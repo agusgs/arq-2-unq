@@ -37,11 +37,19 @@ A medida que el proyecto crezca, el diccionario de dominio se documentará aquí
   *Atributos*: `id` (String Hex), `first_name` (String), `last_name` (String), `email` (String). 
   *Invariantes de negocio*: El modelo debe construirse con todos los atributos obligatorios completos. A nivel infraestructura, no pueden existir dos perfiles con el mismo e-mail.
 
+- **Station (`WeatherFlow.Domain.Station`)**:
+  Representa un sensor meteorológico físico y punto geográfico de recolección de métricas.
+  *Atributos*: `id` (String Hex), `name` (String), `latitude` (Float), `longitude` (Float).
+  *Invariantes de negocio*: Verifica obligatoriamente que las coordenadas geográficas sean números válidos dentro de los límites del plano (-90.0 a 90.0 para latitud, -180.0 a 180.0 para longitud). A nivel BD, el `name` debe ser único globalmente.
+
 ### Servicios Orquestadores
 - **UserManagementService**: 
   * `register_user(attrs)`: Valida requisitos, invoca persistencia y actúa como escudo atrapando proactivamente los errores del motor BSON por e-mails duplicados para retornar mensajes limpios de dominio.
   * `get_user(id)`: Retorna una entidad o `{:error, :not_found}`. Es resiliente ante formatos de ID inválidos.
   * `list_users()`: Recupera la colección completa de usuarios mapeada de base de datos a Entidades de Dominio puras.
+
+- **StationManagementService**:
+  * Funciona de análogamente al servicio de usuario, orquestando las duras validaciones paramétricas del modelo `Station` antes de disparar las consultas hacia MongoDB. Actúa como mediador transaccional con el `MongoStationRepository` y resuelve activamente los choques de índices de estación únicos traduciendo WriteErrors.
 
 ## Guía de Uso de la API (Ejemplos Rápidos)
 
@@ -68,6 +76,24 @@ curl -X GET http://localhost:4000/api/users
 ### 3. Obtener Usuario por ID (GET `/api/users/:id`)
 ```bash
 curl -X GET http://localhost:4000/api/users/66144e5b3dc8a6efb349b1a1
+```
+
+### 4. Registrar una Estación (POST `/api/stations/`)
+```bash
+curl -X POST http://localhost:4000/api/stations \
+  -H "Content-Type: application/json" \
+  -d '{
+    "station": {
+      "name": "Estación Sur",
+      "latitude": -34.6118,
+      "longitude": -58.4173
+    }
+  }'
+```
+
+### 5. Listar Estaciones (GET `/api/stations/`)
+```bash
+curl -X GET http://localhost:4000/api/stations
 ```
 
 ## Configuración y Ejecución Local

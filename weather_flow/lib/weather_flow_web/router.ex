@@ -11,6 +11,11 @@ defmodule WeatherFlowWeb.Router do
 
     get "/users", UserController, :index
     post "/users", UserController, :create
+    get "/users/:id", UserController, :show
+
+    get "/stations", StationController, :index
+    post "/stations", StationController, :create
+    get "/stations/:id", StationController, :show
   end
 
   # Swagger UI y Spec Routes

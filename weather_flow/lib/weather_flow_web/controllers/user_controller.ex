@@ -41,6 +41,30 @@ defmodule WeatherFlowWeb.UserController do
     json(conn, users)
   end
 
+  operation :show,
+    summary: "Obtener un usuario por ID",
+    parameters: [
+      id: [in: :path, description: "ID del usuario", type: :string, required: true]
+    ],
+    responses: [
+      ok: {"Usuario encontrado", "application/json", User},
+      not_found: "Usuario no encontrado"
+    ]
+
+  def show(conn, %{"id" => id}) do
+    case UserManagementService.get_user(id) do
+      {:ok, user} ->
+        conn
+        |> put_status(:ok)
+        |> json(user_to_map(user))
+
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Usuario no encontrado."})
+    end
+  end
+
   # Helper para sanear la entidad de Dominio a Mapa JSON-friendly
   defp user_to_map(user) do
     %{

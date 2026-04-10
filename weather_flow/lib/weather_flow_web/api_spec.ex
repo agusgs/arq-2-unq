@@ -18,7 +18,9 @@ defmodule WeatherFlowWeb.ApiSpec do
       components: %Components{
         schemas: %{
           "User" => WeatherFlowWeb.Schemas.User.schema(),
-          "UserRequest" => WeatherFlowWeb.Schemas.UserRequest.schema()
+          "UserRequest" => WeatherFlowWeb.Schemas.UserRequest.schema(),
+          "Station" => WeatherFlowWeb.Schemas.Station.schema(),
+          "StationRequest" => WeatherFlowWeb.Schemas.StationRequest.schema()
         }
       },
       paths: OpenApiSpex.Paths.from_router(WeatherFlowWeb.Router)
