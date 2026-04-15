@@ -37,6 +37,7 @@ defmodule WeatherFlow.Application do
       Task.start(fn ->
         WeatherFlow.Adapters.MongoUserRepository.setup_indexes()
         WeatherFlow.Adapters.MongoStationRepository.setup_indexes()
+        WeatherFlow.Adapters.MongoTelemetryRepository.setup_indexes()
       end)
     end
 

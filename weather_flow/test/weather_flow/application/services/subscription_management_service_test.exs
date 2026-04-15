@@ -64,8 +64,8 @@ defmodule WeatherFlow.Application.Services.SubscriptionManagementServiceTest do
     end
 
     test "falla si el usuario no existe al intentar desuscribir", %{station: station} do
-      assert {:error, :not_found} = 
-             SubscriptionManagementService.unsubscribe("66144e5b3dc8a6efb349b1aa", station.id)
+      assert {:error, :not_found} =
+               SubscriptionManagementService.unsubscribe("66144e5b3dc8a6efb349b1aa", station.id)
     end
   end
 end

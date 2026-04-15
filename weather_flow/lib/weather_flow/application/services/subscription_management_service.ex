@@ -18,7 +18,8 @@ defmodule WeatherFlow.Application.Services.SubscriptionManagementService do
   @doc """
   Intenta suscribir a un usuario a una estación de manera idempotente.
   """
-  @spec subscribe(String.t(), String.t()) :: {:ok, User.t()} | {:error, :not_found} | {:error, :internal_error, any()}
+  @spec subscribe(String.t(), String.t()) ::
+          {:ok, User.t()} | {:error, :not_found} | {:error, :internal_error, any()}
   def subscribe(user_id, station_id) do
     with {:ok, user} <- user_repo().get_by_id(user_id),
          {:ok, _station} <- StationManagementService.get_station(station_id),
@@ -34,7 +35,8 @@ defmodule WeatherFlow.Application.Services.SubscriptionManagementService do
   @doc """
   Desuscribe al usuario de la estación.
   """
-  @spec unsubscribe(String.t(), String.t()) :: {:ok, User.t()} | {:error, :not_found} | {:error, :internal_error, any()}
+  @spec unsubscribe(String.t(), String.t()) ::
+          {:ok, User.t()} | {:error, :not_found} | {:error, :internal_error, any()}
   def unsubscribe(user_id, station_id) do
     with {:ok, user} <- user_repo().get_by_id(user_id),
          updated_user <- User.unsubscribe(user, station_id),

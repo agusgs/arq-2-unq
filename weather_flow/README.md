@@ -42,6 +42,11 @@ A medida que el proyecto crezca, el diccionario de dominio se documentará aquí
   *Atributos*: `id` (String Hex), `name` (String), `latitude` (Float), `longitude` (Float).
   *Invariantes de negocio*: Verifica obligatoriamente que las coordenadas geográficas sean números válidos dentro de los límites del plano (-90.0 a 90.0 para latitud, -180.0 a 180.0 para longitud). A nivel BD, el `name` debe ser único globalmente.
 
+- **Telemetry (`WeatherFlow.Domain.Telemetry`)**:
+  Representa un paquete polimórfico de mediciones IoT en tiempo real.
+  *Atributos*: `id` (String Hex), `station_id` (String Hex), `timestamp` (DateTime), `metrics` (Map dinámico de Strings a valores numéricos).
+  *Invariantes de negocio*: Utiliza el Patrón de Atributos; se permite cualquier variable climática siempre y cuando sus valores internos sean estrictamente numéricos.
+
 ### Servicios Orquestadores
 - **UserManagementService**: 
   * `register_user(attrs)`: Valida requisitos, invoca persistencia y actúa como escudo atrapando proactivamente los errores del motor BSON por e-mails duplicados para retornar mensajes limpios de dominio.
@@ -53,6 +58,9 @@ A medida que el proyecto crezca, el diccionario de dominio se documentará aquí
 
 - **SubscriptionManagementService**:
   * Orquesta transaccionalmente la creación y destrucción de vínculos inmutables (mediante colecciones de IDs) entre los Dominios de `User` y `Station`. Asegura que ambos agregados existan antes del guardado y maneja de manera limpia las tuplas de error de Elixir sin corromper la DB.
+
+- **TelemetryProcessingService**:
+  * `ingest(attrs)`: Servicio de altísimo rendimiento encargado de tragar métricas crudas, parsear y preprocesar su formato web, ensamblar la entidad pura inyectando la fecha del servidor en caso de ser necesario, y persistirla ciegamente en una colección estricta Time-Series optimizando el I/O al evitar comprobaciones de llaves foráneas.
 
 ## Guía de Uso de la API (Ejemplos Rápidos)
 
@@ -111,6 +119,19 @@ curl -X POST http://localhost:4000/api/users/AQUI_TU_USER_ID/subscriptions \
 ### 7. Eliminar Suscripción de un Usuario (DELETE `/api/users/:user_id/subscriptions/:station_id`)
 ```bash
 curl -X DELETE http://localhost:4000/api/users/AQUI_TU_USER_ID/subscriptions/AQUI_TU_STATION_ID
+```
+
+### 8. Ingestar Telemetría de Alta Velocidad (POST `/api/stations/:station_id/telemetry`)
+```bash
+curl -X POST http://localhost:4000/api/stations/AQUI_TU_STATION_ID/telemetry \
+  -H "Content-Type: application/json" \
+  -d '{
+    "metrics": {
+      "temperature": 35.8,
+      "humidity": 42.1,
+      "wind_speed": 12.3
+    }
+  }'
 ```
 
 ## Configuración y Ejecución Local
