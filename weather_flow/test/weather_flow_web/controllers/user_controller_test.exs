@@ -13,7 +13,7 @@ defmodule WeatherFlowWeb.UserControllerTest do
     test "crea exitosamente un usuario devolviendo JSON de creacion", %{conn: conn} do
       payload = %{"first_name" => "Juan", "last_name" => "Pérez", "email" => "juan@test.com"}
       conn = post(conn, "/api/users", payload)
-      
+
       response = json_response(conn, 201)
       assert response["email"] == "juan@test.com"
       assert is_binary(response["id"])
@@ -23,8 +23,12 @@ defmodule WeatherFlowWeb.UserControllerTest do
 
   describe "GET /api/users" do
     test "lista los usuarios registrados en un arreglo", %{conn: conn} do
-      post(conn, "/api/users", %{"first_name" => "U1", "last_name" => "L1", "email" => "u1@test.com"})
-      
+      post(conn, "/api/users", %{
+        "first_name" => "U1",
+        "last_name" => "L1",
+        "email" => "u1@test.com"
+      })
+
       conn_get = get(conn, "/api/users")
       assert [%{"email" => "u1@test.com"}] = json_response(conn_get, 200)
     end
@@ -35,9 +39,15 @@ defmodule WeatherFlowWeb.UserControllerTest do
       conn = get(conn, "/api/users/invalido")
       assert %{"error" => "Usuario no encontrado."} = json_response(conn, 404)
     end
-    
+
     test "retorna la entidad codificada si el usuario existe", %{conn: conn} do
-      conn_created = post(conn, "/api/users", %{"first_name" => "U", "last_name" => "L", "email" => "u_show@test.com"})
+      conn_created =
+        post(conn, "/api/users", %{
+          "first_name" => "U",
+          "last_name" => "L",
+          "email" => "u_show@test.com"
+        })
+
       user_id = json_response(conn_created, 201)["id"]
 
       conn_show = get(conn, "/api/users/#{user_id}")

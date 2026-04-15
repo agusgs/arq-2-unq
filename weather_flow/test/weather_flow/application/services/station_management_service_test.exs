@@ -24,15 +24,18 @@ defmodule WeatherFlow.Application.Services.StationManagementServiceTest do
 
     test "falla si los atributos son inválidos (dominio puro)" do
       attrs = %{"name" => "", "latitude" => -34.0, "longitude" => -58.0}
-      assert {:error, "El nombre de la estación es obligatorio."} = StationManagementService.register_station(attrs)
+
+      assert {:error, "El nombre de la estación es obligatorio."} =
+               StationManagementService.register_station(attrs)
     end
 
     test "falla si se intenta registrar una estación con un nombre duplicado en BD" do
-       attrs = %{"name" => "Estación Única", "latitude" => -34.0, "longitude" => -58.0}
-       assert {:ok, _} = StationManagementService.register_station(attrs)
-       
-       # El segundo registro choca con el índice de MongoDB directamente
-       assert {:error, "El nombre de la estación ya se encuentra registrado."} = StationManagementService.register_station(attrs)
+      attrs = %{"name" => "Estación Única", "latitude" => -34.0, "longitude" => -58.0}
+      assert {:ok, _} = StationManagementService.register_station(attrs)
+
+      # El segundo registro choca con el índice de MongoDB directamente
+      assert {:error, "El nombre de la estación ya se encuentra registrado."} =
+               StationManagementService.register_station(attrs)
     end
   end
 
@@ -42,8 +45,17 @@ defmodule WeatherFlow.Application.Services.StationManagementServiceTest do
     end
 
     test "retorna todas las estaciones almacenadas" do
-      StationManagementService.register_station(%{"name" => "Sur", "latitude" => -40.0, "longitude" => -60.0})
-      StationManagementService.register_station(%{"name" => "Norte", "latitude" => -20.0, "longitude" => -60.0})
+      StationManagementService.register_station(%{
+        "name" => "Sur",
+        "latitude" => -40.0,
+        "longitude" => -60.0
+      })
+
+      StationManagementService.register_station(%{
+        "name" => "Norte",
+        "latitude" => -20.0,
+        "longitude" => -60.0
+      })
 
       assert {:ok, stations} = StationManagementService.list_stations()
       assert length(stations) == 2
@@ -52,10 +64,12 @@ defmodule WeatherFlow.Application.Services.StationManagementServiceTest do
 
   describe "get_station/1" do
     test "retorna :not_found si el objectId no existe en Mongo o es inválido" do
-       assert {:error, :not_found} = StationManagementService.get_station("123456789012345678901234")
-       assert {:error, :not_found} = StationManagementService.get_station("id_corta_invalida")
+      assert {:error, :not_found} =
+               StationManagementService.get_station("123456789012345678901234")
+
+      assert {:error, :not_found} = StationManagementService.get_station("id_corta_invalida")
     end
-    
+
     test "retorna la estación correctamente por ID real" do
       attrs = %{"name" => "Estación Este", "latitude" => -10.0, "longitude" => -40.0}
       {:ok, %Station{id: id}} = StationManagementService.register_station(attrs)

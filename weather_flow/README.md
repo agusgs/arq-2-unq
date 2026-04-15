@@ -34,7 +34,7 @@ A medida que el proyecto crezca, el diccionario de dominio se documentará aquí
 ### Modelos de Dominio
 - **User (`WeatherFlow.Domain.User`)**: 
   Representa a un miembro o administrador de la plataforma. 
-  *Atributos*: `id` (String Hex), `first_name` (String), `last_name` (String), `email` (String). 
+  *Atributos*: `id` (String Hex), `first_name` (String), `last_name` (String), `email` (String), `subscriptions` (Arreglo de Strings/IDs Hex). 
   *Invariantes de negocio*: El modelo debe construirse con todos los atributos obligatorios completos. A nivel infraestructura, no pueden existir dos perfiles con el mismo e-mail.
 
 - **Station (`WeatherFlow.Domain.Station`)**:
@@ -50,6 +50,9 @@ A medida que el proyecto crezca, el diccionario de dominio se documentará aquí
 
 - **StationManagementService**:
   * Funciona de análogamente al servicio de usuario, orquestando las duras validaciones paramétricas del modelo `Station` antes de disparar las consultas hacia MongoDB. Actúa como mediador transaccional con el `MongoStationRepository` y resuelve activamente los choques de índices de estación únicos traduciendo WriteErrors.
+
+- **SubscriptionManagementService**:
+  * Orquesta transaccionalmente la creación y destrucción de vínculos inmutables (mediante colecciones de IDs) entre los Dominios de `User` y `Station`. Asegura que ambos agregados existan antes del guardado y maneja de manera limpia las tuplas de error de Elixir sin corromper la DB.
 
 ## Guía de Uso de la API (Ejemplos Rápidos)
 
@@ -94,6 +97,20 @@ curl -X POST http://localhost:4000/api/stations \
 ### 5. Listar Estaciones (GET `/api/stations/`)
 ```bash
 curl -X GET http://localhost:4000/api/stations
+```
+
+### 6. Suscribir un Usuario a una Estación (POST `/api/users/:user_id/subscriptions`)
+```bash
+curl -X POST http://localhost:4000/api/users/AQUI_TU_USER_ID/subscriptions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "station_id": "AQUI_TU_STATION_ID"
+  }'
+```
+
+### 7. Eliminar Suscripción de un Usuario (DELETE `/api/users/:user_id/subscriptions/:station_id`)
+```bash
+curl -X DELETE http://localhost:4000/api/users/AQUI_TU_USER_ID/subscriptions/AQUI_TU_STATION_ID
 ```
 
 ## Configuración y Ejecución Local

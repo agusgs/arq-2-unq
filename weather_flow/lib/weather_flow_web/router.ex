@@ -16,13 +16,16 @@ defmodule WeatherFlowWeb.Router do
     get "/stations", StationController, :index
     post "/stations", StationController, :create
     get "/stations/:id", StationController, :show
+
+    post "/users/:user_id/subscriptions", SubscriptionController, :create
+    delete "/users/:user_id/subscriptions/:station_id", SubscriptionController, :delete
   end
 
   # Swagger UI y Spec Routes
   scope "/api" do
     pipe_through :api
 
-    get "/openapi", OpenApiSpex.Plug.RenderSpec, [default: WeatherFlowWeb.ApiSpec]
+    get "/openapi", OpenApiSpex.Plug.RenderSpec, default: WeatherFlowWeb.ApiSpec
     get "/swaggerui", OpenApiSpex.Plug.SwaggerUI, path: "/api/openapi"
   end
 

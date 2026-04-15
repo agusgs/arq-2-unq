@@ -11,9 +11,12 @@ defmodule WeatherFlowWeb.StationControllerTest do
 
   describe "POST /api/stations" do
     test "crea exitosamente una estación y la retorna codificada en JSON", %{conn: conn} do
-      payload = %{"station" => %{"name" => "Estación Test API", "latitude" => -34.0, "longitude" => -58.0}}
+      payload = %{
+        "station" => %{"name" => "Estación Test API", "latitude" => -34.0, "longitude" => -58.0}
+      }
+
       conn = post(conn, "/api/stations", payload)
-      
+
       response = json_response(conn, 201)
       assert response["name"] == "Estación Test API"
       assert response["latitude"] == -34.0
@@ -22,17 +25,24 @@ defmodule WeatherFlowWeb.StationControllerTest do
     end
 
     test "retorna 400 Bad Request si faltan parámetros del dominio", %{conn: conn} do
-      payload = %{"station" => %{"latitude" => -34.0, "longitude" => -58.0}} # Sin name
+      # Sin name
+      payload = %{"station" => %{"latitude" => -34.0, "longitude" => -58.0}}
       conn = post(conn, "/api/stations", payload)
 
-      assert %{"error" => "Los parámetros name, latitude y longitude son obligatorios."} = json_response(conn, 400)
+      assert %{"error" => "Los parámetros name, latitude y longitude son obligatorios."} =
+               json_response(conn, 400)
     end
   end
 
   describe "GET /api/stations" do
     test "retorna todas las estaciones en un arreglo", %{conn: conn} do
-      post(conn, "/api/stations", %{"station" => %{"name" => "S1", "latitude" => 1.0, "longitude" => 1.0}})
-      post(conn, "/api/stations", %{"station" => %{"name" => "S2", "latitude" => 2.0, "longitude" => 2.0}})
+      post(conn, "/api/stations", %{
+        "station" => %{"name" => "S1", "latitude" => 1.0, "longitude" => 1.0}
+      })
+
+      post(conn, "/api/stations", %{
+        "station" => %{"name" => "S2", "latitude" => 2.0, "longitude" => 2.0}
+      })
 
       conn = get(conn, "/api/stations")
       stations_list = json_response(conn, 200)
@@ -42,7 +52,11 @@ defmodule WeatherFlowWeb.StationControllerTest do
 
   describe "GET /api/stations/:id" do
     test "retorna 200 y el objeto si la estación es encontrada", %{conn: conn} do
-      conn_created = post(conn, "/api/stations", %{"station" => %{"name" => "Buscada", "latitude" => 1.0, "longitude" => 1.0}})
+      conn_created =
+        post(conn, "/api/stations", %{
+          "station" => %{"name" => "Buscada", "latitude" => 1.0, "longitude" => 1.0}
+        })
+
       id = json_response(conn_created, 201)["id"]
 
       conn_show = get(conn, "/api/stations/#{id}")

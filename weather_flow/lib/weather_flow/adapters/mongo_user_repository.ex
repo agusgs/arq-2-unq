@@ -12,6 +12,7 @@ defmodule WeatherFlow.Adapters.MongoUserRepository do
         [key: [email: 1], name: "email_unique_index", unique: true]
       ]
     ]
+
     Mongo.command(:mongo, command)
   end
 
@@ -35,6 +36,7 @@ defmodule WeatherFlow.Adapters.MongoUserRepository do
   @impl true
   def get_by_id(id) when is_binary(id) do
     bson_id = BSON.ObjectId.decode!(id)
+
     case Mongo.find_one(:mongo, @collection, %{"_id" => bson_id}) do
       nil -> {:error, :not_found}
       doc -> {:ok, document_to_user(doc)}
@@ -66,11 +68,17 @@ defmodule WeatherFlow.Adapters.MongoUserRepository do
     doc = user_to_document(user)
 
     case Mongo.update_one(:mongo, @collection, %{"_id" => bson_id}, %{"$set" => doc}) do
-      {:ok, _result} -> {:ok, user}
-      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000} | _]}} -> {:error, :email_already_registered}
-      {:error, reason} -> {:error, reason}
+      {:ok, _result} ->
+        {:ok, user}
+
+      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000} | _]}} ->
+        {:error, :email_already_registered}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
+
   def update(%User{id: nil}), do: {:error, :missing_id}
 
   defp user_to_document(%User{} = user) do
@@ -82,7 +90,9 @@ defmodule WeatherFlow.Adapters.MongoUserRepository do
     }
   end
 
-  defp document_to_user(%{"_id" => bson_id, "first_name" => first, "last_name" => last, "email" => email} = doc) do
+  defp document_to_user(
+         %{"_id" => bson_id, "first_name" => first, "last_name" => last, "email" => email} = doc
+       ) do
     string_id = BSON.ObjectId.encode!(bson_id)
 
     %User{

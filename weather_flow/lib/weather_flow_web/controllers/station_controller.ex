@@ -5,14 +5,17 @@ defmodule WeatherFlowWeb.StationController do
   alias WeatherFlow.Application.Services.StationManagementService
   alias WeatherFlow.Domain.Station
 
-  tags ["Stations"]
+  tags(["Stations"])
 
-  operation :index,
+  operation(:index,
     summary: "Lista todas las estaciones",
     description: "Recupera un arreglo con todas las estaciones registradas.",
     responses: [
-      ok: {"Lista de estaciones devuelta con éxito", "application/json", %OpenApiSpex.Schema{type: :array, items: WeatherFlowWeb.Schemas.Station}}
+      ok:
+        {"Lista de estaciones devuelta con éxito", "application/json",
+         %OpenApiSpex.Schema{type: :array, items: WeatherFlowWeb.Schemas.Station}}
     ]
+  )
 
   def index(conn, _params) do
     {:ok, stations} = StationManagementService.list_stations()
@@ -23,14 +26,23 @@ defmodule WeatherFlowWeb.StationController do
     |> json(stations_map)
   end
 
-  operation :create,
+  operation(:create,
     summary: "Registra una nueva estación",
     description: "Guarda una nueva estación meteorológica validando las coordenadas y nombre.",
-    request_body: {"Payload de la estación", "application/json", WeatherFlowWeb.Schemas.StationRequest, required: true},
+    request_body:
+      {"Payload de la estación", "application/json", WeatherFlowWeb.Schemas.StationRequest,
+       required: true},
     responses: [
-      created: {"Estación registrada correctamente", "application/json", WeatherFlowWeb.Schemas.Station},
-      bad_request: {"Error de validación del dominio o infraestructura", "application/json", %OpenApiSpex.Schema{type: :object, properties: %{error: %OpenApiSpex.Schema{type: :string}}}}
+      created:
+        {"Estación registrada correctamente", "application/json", WeatherFlowWeb.Schemas.Station},
+      bad_request:
+        {"Error de validación del dominio o infraestructura", "application/json",
+         %OpenApiSpex.Schema{
+           type: :object,
+           properties: %{error: %OpenApiSpex.Schema{type: :string}}
+         }}
     ]
+  )
 
   def create(conn, %{"station" => station_params}) do
     case StationManagementService.register_station(station_params) do
@@ -39,19 +51,14 @@ defmodule WeatherFlowWeb.StationController do
         |> put_status(:created)
         |> json(station_to_map(station))
 
-      {:error, reason} when is_binary(reason) ->
+      {:error, reason} ->
         conn
         |> put_status(:bad_request)
         |> json(%{error: reason})
-
-      {:error, _reason} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Error inesperado al registrar la estación."})
     end
   end
 
-  operation :show,
+  operation(:show,
     summary: "Obtiene una estación por ID",
     description: "Recupera los datos de una estación buscando por su ObjectID hexadecimal.",
     parameters: [
@@ -59,8 +66,14 @@ defmodule WeatherFlowWeb.StationController do
     ],
     responses: [
       ok: {"Estación encontrada", "application/json", WeatherFlowWeb.Schemas.Station},
-      not_found: {"Estación no encontrada", "application/json", %OpenApiSpex.Schema{type: :object, properties: %{error: %OpenApiSpex.Schema{type: :string}}}}
+      not_found:
+        {"Estación no encontrada", "application/json",
+         %OpenApiSpex.Schema{
+           type: :object,
+           properties: %{error: %OpenApiSpex.Schema{type: :string}}
+         }}
     ]
+  )
 
   def show(conn, %{"id" => id}) do
     case StationManagementService.get_station(id) do

@@ -15,16 +15,19 @@ defmodule WeatherFlow.Domain.StationTest do
     end
 
     test "acepta valores enteros en lat y lon y los convierte a float" do
-       attrs = %{"name" => "Estación Numérica", "latitude" => 10, "longitude" => -20}
+      attrs = %{"name" => "Estación Numérica", "latitude" => 10, "longitude" => -20}
 
-       assert {:ok, %Station{} = station} = Station.new(attrs)
-       assert station.latitude === 10.0
-       assert station.longitude === -20.0
+      assert {:ok, %Station{} = station} = Station.new(attrs)
+      assert station.latitude === 10.0
+      assert station.longitude === -20.0
     end
 
     test "retorna error si falta algún parámetro obligatorio" do
-      assert {:error, "Los parámetros name, latitude y longitude son obligatorios."} = Station.new(%{"name" => "Algo"})
-      assert {:error, "Los parámetros name, latitude y longitude son obligatorios."} = Station.new(%{"latitude" => 10.0, "longitude" => 20.0})
+      assert {:error, "Los parámetros name, latitude y longitude son obligatorios."} =
+               Station.new(%{"name" => "Algo"})
+
+      assert {:error, "Los parámetros name, latitude y longitude son obligatorios."} =
+               Station.new(%{"latitude" => 10.0, "longitude" => 20.0})
     end
 
     test "retorna error si el nombre está vacío o nulo" do

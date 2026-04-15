@@ -1,7 +1,13 @@
 defmodule WeatherFlow.Application.Services.UserManagementService do
   alias WeatherFlow.Domain.User
 
-  defp repo, do: Application.get_env(:weather_flow, :user_repository, WeatherFlow.Adapters.MongoUserRepository)
+  defp repo,
+    do:
+      Application.get_env(
+        :weather_flow,
+        :user_repository,
+        WeatherFlow.Adapters.MongoUserRepository
+      )
 
   @spec register_user(map() | keyword()) :: {:ok, User.t()} | {:error, any()}
   def register_user(attrs) do
