@@ -23,7 +23,8 @@ defmodule WeatherFlowWeb.ApiSpec do
           "StationRequest" => WeatherFlowWeb.Schemas.StationRequest.schema(),
           "SubscriptionRequest" => WeatherFlowWeb.Schemas.SubscriptionRequest.schema(),
           "TelemetryRequest" => WeatherFlowWeb.Schemas.TelemetryRequest.schema(),
-          "TelemetryResponse" => WeatherFlowWeb.Schemas.TelemetryResponse.schema()
+          "TelemetryResponse" => WeatherFlowWeb.Schemas.TelemetryResponse.schema(),
+          "Alert" => WeatherFlowWeb.Schemas.Alert.schema()
         }
       },
       paths: OpenApiSpex.Paths.from_router(WeatherFlowWeb.Router)

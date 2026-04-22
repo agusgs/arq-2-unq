@@ -13,7 +13,7 @@ defmodule WeatherFlow.Domain.Telemetry do
         }
 
   @doc """
-  Construye de forma segura una entidad. Valida específicamente el Map dinámico.
+  Construye de forma segura una entidad. Valida el Map dinámico.
   """
   @spec new(map() | keyword()) :: {:ok, t()} | {:error, String.t()}
   def new(attrs) do

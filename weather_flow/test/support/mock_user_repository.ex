@@ -54,4 +54,7 @@ defmodule WeatherFlow.MockUserRepository do
   @impl true
   def update(%User{id: "mock_id_123"} = user), do: {:ok, user}
   def update(%User{}), do: {:error, :missing_id}
+
+  @impl true
+  def get_users_subscribed_to(_station_id), do: []
 end

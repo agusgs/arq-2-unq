@@ -1,6 +1,6 @@
 defmodule WeatherFlow.Application.Services.TelemetryProcessingService do
   @moduledoc """
-  Servicio orquestador responsable de la ingesta de telemetría proveniente de
+  Servicio responsable de la ingesta de telemetría proveniente de
   las estaciones meteorológicas.
   """
   alias WeatherFlow.Domain.Telemetry
@@ -15,8 +15,7 @@ defmodule WeatherFlow.Application.Services.TelemetryProcessingService do
 
   @doc """
   Recibe un paquete de métricas. Construye la entidad pura validando tipos,
-  inyecta la fecha UTC actual si falta, y persiste directamente en la Time-Series
-  orientada a la alta recurrencia de red.
+  inyecta la fecha UTC actual si falta, y persiste directamente en la Time-Series.
   """
   @spec ingest(map() | keyword()) :: {:ok, Telemetry.t()} | {:error, String.t()}
   def ingest(attrs) do
@@ -47,6 +46,12 @@ defmodule WeatherFlow.Application.Services.TelemetryProcessingService do
 
     with {:ok, telemetry} <- Telemetry.new(parsed_attrs),
          {:ok, saved} <- repo().insert(telemetry) do
+      Phoenix.PubSub.broadcast(
+        WeatherFlow.PubSub,
+        "telemetry_stream",
+        {:telemetry_inserted, saved}
+      )
+
       {:ok, saved}
     else
       {:error, reason} when is_binary(reason) ->

@@ -22,9 +22,7 @@ defmodule WeatherFlow.Application do
          url: mongo_config[:url],
          pool_size: mongo_config[:pool_size] || 2
        ]},
-      # Start a worker by calling: WeatherFlow.Worker.start_link(arg)
-      # {WeatherFlow.Worker, arg},
-      # Start to serve requests, typically the last entry
+      WeatherFlow.Application.Workers.AlertEngine,
       WeatherFlowWeb.Endpoint
     ]
 
@@ -38,6 +36,7 @@ defmodule WeatherFlow.Application do
         WeatherFlow.Adapters.MongoUserRepository.setup_indexes()
         WeatherFlow.Adapters.MongoStationRepository.setup_indexes()
         WeatherFlow.Adapters.MongoTelemetryRepository.setup_indexes()
+        WeatherFlow.Adapters.MongoAlertRepository.setup_indexes()
       end)
     end
 

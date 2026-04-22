@@ -63,6 +63,13 @@ defmodule WeatherFlow.Adapters.MongoUserRepository do
   end
 
   @impl true
+  def get_users_subscribed_to(station_id) when is_binary(station_id) do
+    Mongo.find(:mongo, @collection, %{"subscriptions" => station_id})
+    |> Enum.to_list()
+    |> Enum.map(&document_to_user/1)
+  end
+
+  @impl true
   def update(%User{id: id} = user) when is_binary(id) do
     bson_id = BSON.ObjectId.decode!(id)
     doc = user_to_document(user)
