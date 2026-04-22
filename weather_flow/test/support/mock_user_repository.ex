@@ -57,4 +57,8 @@ defmodule WeatherFlow.MockUserRepository do
 
   @impl true
   def get_users_subscribed_to(_station_id), do: []
+
+  @impl true
+  def delete("mock_id_123"), do: :ok
+  def delete(_), do: {:error, :not_found}
 end

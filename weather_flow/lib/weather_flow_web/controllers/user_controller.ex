@@ -70,6 +70,61 @@ defmodule WeatherFlowWeb.UserController do
     end
   end
 
+  operation(:update,
+    summary: "Actualizar datos de un usuario",
+    parameters: [
+      id: [in: :path, description: "ID del usuario", type: :string, required: true]
+    ],
+    request_body: {"Nuevos atributos", "application/json", UserRequest},
+    responses: [
+      ok: {"Usuario actualizado", "application/json", User},
+      not_found: "Usuario no encontrado",
+      bad_request: "Error de validación"
+    ]
+  )
+
+  def update(conn, %{"id" => id} = params) do
+    case UserManagementService.update_user(id, params) do
+      {:ok, user} ->
+        conn
+        |> put_status(:ok)
+        |> json(user_to_map(user))
+
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Usuario no encontrado."})
+
+      {:error, reason} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: reason})
+    end
+  end
+
+  operation(:delete,
+    summary: "Eliminar un usuario",
+    parameters: [
+      id: [in: :path, description: "ID del usuario a eliminar", type: :string, required: true]
+    ],
+    responses: [
+      no_content: "Usuario eliminado exitosamente",
+      not_found: "Usuario no encontrado"
+    ]
+  )
+
+  def delete(conn, %{"id" => id}) do
+    case UserManagementService.delete_user(id) do
+      :ok ->
+        send_resp(conn, :no_content, "")
+
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Usuario no encontrado."})
+    end
+  end
+
   # Helper para sanear la entidad de Dominio a Mapa JSON-friendly
   defp user_to_map(user) do
     %{

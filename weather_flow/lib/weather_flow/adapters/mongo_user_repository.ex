@@ -88,6 +88,25 @@ defmodule WeatherFlow.Adapters.MongoUserRepository do
 
   def update(%User{id: nil}), do: {:error, :missing_id}
 
+  @impl true
+  def delete(id) when is_binary(id) do
+    bson_id = BSON.ObjectId.decode!(id)
+
+    case Mongo.delete_one(:mongo, @collection, %{"_id" => bson_id}) do
+      {:ok, %Mongo.DeleteResult{deleted_count: 1}} ->
+        :ok
+
+      {:ok, %Mongo.DeleteResult{deleted_count: 0}} ->
+        {:error, :not_found}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  rescue
+    MatchError -> {:error, :not_found}
+    ArgumentError -> {:error, :not_found}
+  end
+
   defp user_to_document(%User{} = user) do
     %{
       "first_name" => user.first_name,

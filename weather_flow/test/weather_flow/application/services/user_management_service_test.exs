@@ -78,4 +78,26 @@ defmodule WeatherFlow.Application.Services.UserManagementServiceTest do
       assert user.email == "marta@test.com"
     end
   end
+
+  describe "update_user/2" do
+    test "actualiza los campos permitidos y mantiene id/subscripciones" do
+      attrs = %{"first_name" => "Viejo", "last_name" => "Viejo", "email" => "viejo@test.com"}
+      {:ok, user} = UserManagementService.register_user(attrs)
+
+      {:ok, updated} = UserManagementService.update_user(user.id, %{"first_name" => "Nuevo"})
+      assert updated.first_name == "Nuevo"
+      assert updated.last_name == "Viejo"
+      assert updated.email == "viejo@test.com"
+    end
+  end
+
+  describe "delete_user/1" do
+    test "borra exitosamente el usuario de la db" do
+      attrs = %{"first_name" => "Borrar", "last_name" => "Me", "email" => "borrar@test.com"}
+      {:ok, user} = UserManagementService.register_user(attrs)
+
+      assert :ok = UserManagementService.delete_user(user.id)
+      assert {:error, :not_found} = UserManagementService.get_user(user.id)
+    end
+  end
 end

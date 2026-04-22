@@ -12,6 +12,8 @@ defmodule WeatherFlowWeb.Router do
     get "/users", UserController, :index
     post "/users", UserController, :create
     get "/users/:id", UserController, :show
+    put "/users/:id", UserController, :update
+    delete "/users/:id", UserController, :delete
 
     get "/stations", StationController, :index
     post "/stations", StationController, :create
