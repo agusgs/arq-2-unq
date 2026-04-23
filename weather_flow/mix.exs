@@ -10,7 +10,46 @@ defmodule WeatherFlow.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      name: "WeatherFlow",
+      source_url: "https://github.com/agusgs/arq-2-unq",
+      docs: [
+        main: "readme",
+        extras: [
+          "README.md",
+          "docs/architecture.md",
+          "docs/domain_model.md",
+          "docs/database.md",
+          "docs/api_guide.md"
+        ],
+        before_closing_body_tag: fn
+          :html ->
+            """
+            <script src="https://cdn.jsdelivr.net/npm/mermaid@10.2.3/dist/mermaid.min.js"></script>
+            <script>
+              document.addEventListener("DOMContentLoaded", function () {
+                const isDark = document.documentElement.classList.contains("dark") ||
+                               (!document.documentElement.classList.contains("light") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+                mermaid.initialize({ startOnLoad: false, theme: isDark ? "dark" : "default" });
+                let id = 0;
+                for (const codeEl of document.querySelectorAll("pre code.mermaid")) {
+                  const preEl = codeEl.parentElement;
+                  const graphDefinition = codeEl.textContent;
+                  const graphEl = document.createElement("div");
+                  const graphId = "mermaid-graph-" + id++;
+                  mermaid.render(graphId, graphDefinition).then(({svg, bindFunctions}) => {
+                    graphEl.innerHTML = svg;
+                    bindFunctions?.(graphEl);
+                    preEl.insertAdjacentElement("afterend", graphEl);
+                    preEl.remove();
+                  });
+                }
+              });
+            </script>
+            """
+          _ -> ""
+        end
+      ]
     ]
   end
 
@@ -50,7 +89,8 @@ defmodule WeatherFlow.MixProject do
       {:mongodb_driver, "~> 1.4"},
       {:open_api_spex, "~> 3.18"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.31", only: :dev, runtime: false}
     ]
   end
 

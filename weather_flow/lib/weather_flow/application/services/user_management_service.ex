@@ -1,4 +1,7 @@
 defmodule WeatherFlow.Application.Services.UserManagementService do
+  @moduledoc """
+  Servicio orquestador responsable de la gestión de usuarios y sus perfiles.
+  """
   alias WeatherFlow.Domain.User
 
   defp repo,
@@ -9,6 +12,9 @@ defmodule WeatherFlow.Application.Services.UserManagementService do
         WeatherFlow.Adapters.MongoUserRepository
       )
 
+  @doc """
+  Registra un nuevo usuario en la plataforma validando sus campos obligatorios.
+  """
   @spec register_user(map() | keyword()) :: {:ok, User.t()} | {:error, any()}
   def register_user(attrs) do
     with {:ok, user} <- User.new(attrs),
@@ -20,9 +26,15 @@ defmodule WeatherFlow.Application.Services.UserManagementService do
     end
   end
 
+  @doc """
+  Obtiene un usuario a través de su ID unívoco (BSON transformado a String).
+  """
   @spec get_user(String.t()) :: {:ok, User.t()} | {:error, :not_found}
   def get_user(id), do: repo().get_by_id(id)
 
+  @doc """
+  Devuelve la colección completa de usuarios del sistema mapeada a Entidades Puras.
+  """
   @spec list_users() :: [User.t()]
   def list_users(), do: repo().get_all()
 

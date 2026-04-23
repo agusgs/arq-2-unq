@@ -1,4 +1,9 @@
 defmodule WeatherFlow.Domain.User do
+  @moduledoc """
+  Entidad inmutable que representa a un miembro de la plataforma.
+  Utiliza el enfoque DDD (Domain-Driven Design) para garantizar 
+  la consistencia de los datos en memoria antes de persistir.
+  """
   @enforce_keys [:first_name, :last_name, :email]
   defstruct [:id, :first_name, :last_name, :email, subscriptions: []]
 
