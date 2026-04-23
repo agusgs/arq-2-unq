@@ -28,7 +28,8 @@ defmodule WeatherFlow.Adapters.MongoStationRepository do
       "_id" => bson_id,
       "name" => station.name,
       "latitude" => station.latitude,
-      "longitude" => station.longitude
+      "longitude" => station.longitude,
+      "is_deleted" => false
     }
 
     case Mongo.insert_one(:mongo, @collection, doc) do
@@ -59,8 +60,9 @@ defmodule WeatherFlow.Adapters.MongoStationRepository do
   end
 
   @impl true
-  def list_all() do
-    cursor = Mongo.find(:mongo, @collection, %{})
+  def list_all(filters \\ %{}) do
+    mongo_filter = build_mongo_filter(filters)
+    cursor = Mongo.find(:mongo, @collection, mongo_filter)
 
     stations =
       cursor
@@ -68,6 +70,14 @@ defmodule WeatherFlow.Adapters.MongoStationRepository do
       |> Enum.map(&document_to_station/1)
 
     {:ok, stations}
+  end
+
+  defp build_mongo_filter(filters) do
+    Enum.reduce(filters, %{}, fn
+      {:is_deleted, false}, acc -> Map.put(acc, "is_deleted", %{"$ne" => true})
+      {:is_deleted, true}, acc -> Map.put(acc, "is_deleted", true)
+      _, acc -> acc
+    end)
   end
 
   defp document_to_station(doc) do
@@ -78,7 +88,33 @@ defmodule WeatherFlow.Adapters.MongoStationRepository do
       id: string_id,
       name: Map.get(doc, "name"),
       latitude: Map.get(doc, "latitude"),
-      longitude: Map.get(doc, "longitude")
+      longitude: Map.get(doc, "longitude"),
+      is_deleted: Map.get(doc, "is_deleted", false)
     }
   end
+
+  @impl true
+  def update(%Station{id: id} = station) when is_binary(id) do
+    bson_id = BSON.ObjectId.decode!(id)
+
+    doc = %{
+      "name" => station.name,
+      "latitude" => station.latitude,
+      "longitude" => station.longitude,
+      "is_deleted" => station.is_deleted
+    }
+
+    case Mongo.update_one(:mongo, @collection, %{"_id" => bson_id}, %{"$set" => doc}) do
+      {:ok, _result} ->
+        {:ok, station}
+
+      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000} | _]}} ->
+        {:error, :name_already_registered}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def update(%Station{id: nil}), do: {:error, :missing_id}
 end

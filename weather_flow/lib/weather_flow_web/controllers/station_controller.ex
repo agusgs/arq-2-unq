@@ -89,6 +89,63 @@ defmodule WeatherFlowWeb.StationController do
     end
   end
 
+  operation(:update,
+    summary: "Actualiza una estación",
+    description: "Modifica nombre o coordenadas de una estación existente.",
+    parameters: [
+      id: [in: :path, description: "ID de la estación", type: :string, required: true]
+    ],
+    request_body: {"Nuevos datos", "application/json", WeatherFlowWeb.Schemas.StationRequest},
+    responses: [
+      ok: {"Estación actualizada", "application/json", WeatherFlowWeb.Schemas.Station},
+      not_found: "Estación no encontrada",
+      bad_request: "Error de validación"
+    ]
+  )
+
+  def update(conn, %{"id" => id, "station" => station_params}) do
+    case StationManagementService.update_station(id, station_params) do
+      {:ok, %Station{} = station} ->
+        conn
+        |> put_status(:ok)
+        |> json(station_to_map(station))
+
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Estación no encontrada."})
+
+      {:error, reason} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: reason})
+    end
+  end
+
+  operation(:delete,
+    summary: "Elimina una estación lógicamente",
+    description: "Realiza un soft-delete de la estación.",
+    parameters: [
+      id: [in: :path, description: "ID de la estación", type: :string, required: true]
+    ],
+    responses: [
+      no_content: "Estación borrada",
+      not_found: "Estación no encontrada"
+    ]
+  )
+
+  def delete(conn, %{"id" => id}) do
+    case StationManagementService.delete_station(id) do
+      :ok ->
+        send_resp(conn, :no_content, "")
+
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Estación no encontrada."})
+    end
+  end
+
   # Helper para sanear la entidad de Dominio a un Mapa serializable por Jason
   defp station_to_map(station) do
     %{

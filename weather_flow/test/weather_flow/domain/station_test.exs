@@ -61,4 +61,15 @@ defmodule WeatherFlow.Domain.StationTest do
                Station.new(%{"name" => "Estación", "latitude" => 0.0, "longitude" => -180.1})
     end
   end
+
+  describe "delete/1" do
+    test "marca is_deleted como true inmutablemente" do
+      {:ok, station} = Station.new(%{"name" => "Del", "latitude" => 10.0, "longitude" => 10.0})
+      assert station.is_deleted == false
+
+      deleted = Station.delete(station)
+      assert deleted.is_deleted == true
+      assert deleted.name == station.name
+    end
+  end
 end

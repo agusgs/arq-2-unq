@@ -68,4 +68,31 @@ defmodule WeatherFlowWeb.StationControllerTest do
       assert %{"error" => "Estación no encontrada."} = json_response(conn, 404)
     end
   end
+
+  describe "PUT /api/stations/:id" do
+    test "actualiza la estación", %{conn: conn} do
+      conn_created = post(conn, "/api/stations", %{
+        "station" => %{"name" => "S1", "latitude" => 1.0, "longitude" => 1.0}
+      })
+      id = json_response(conn_created, 201)["id"]
+
+      conn_update = put(conn, "/api/stations/#{id}", %{"station" => %{"name" => "S2"}})
+      assert json_response(conn_update, 200)["name"] == "S2"
+    end
+  end
+
+  describe "DELETE /api/stations/:id" do
+    test "borra logicamente la estacion devolviendo 204", %{conn: conn} do
+      conn_created = post(conn, "/api/stations", %{
+        "station" => %{"name" => "SDEL", "latitude" => 1.0, "longitude" => 1.0}
+      })
+      id = json_response(conn_created, 201)["id"]
+
+      conn_delete = delete(conn, "/api/stations/#{id}")
+      assert response(conn_delete, 204)
+
+      conn_get = get(conn, "/api/stations/#{id}")
+      assert json_response(conn_get, 404)
+    end
+  end
 end

@@ -1,22 +1,21 @@
 defmodule WeatherFlow.Domain.Station do
   @moduledoc """
-  Entidad inmutable que representa una Estación Meteorológica en el dominio.
-  Responsable de garantizar las reglas de negocio (ej. asegurar presencia de nombre y un rango geométrico válido).
+  Entidad que representa una Estación Meteorológica en el dominio.
   """
 
   @enforce_keys [:name, :latitude, :longitude]
-  defstruct [:id, :name, :latitude, :longitude]
+  defstruct [:id, :name, :latitude, :longitude, is_deleted: false]
 
   @type t :: %__MODULE__{
           id: String.t() | nil,
           name: String.t(),
           latitude: float(),
-          longitude: float()
+          longitude: float(),
+          is_deleted: boolean()
         }
 
   @doc """
-  Construye una nueva estructura `Station`. Aplica reglas de validación en tiempo de creación
-  para evitar instanciar estaciones ilegales.
+  Construye una nueva estructura `Station`. Aplica reglas de validación en tiempo de creación.
   Valida la presencia del nombre, que la latitud esté entre -90.0 y 90.0, y la longitud entre -180.0 y 180.0
   """
   @spec new(map()) :: {:ok, t()} | {:error, String.t()}
@@ -40,13 +39,21 @@ defmodule WeatherFlow.Domain.Station do
       true ->
         {:ok,
          %__MODULE__{
-           # Convertimos explícitamente a float por si se envían enteros (ej. 10 en lugar de 10.0)
            name: String.trim(name),
            latitude: lat * 1.0,
-           longitude: lon * 1.0
+           longitude: lon * 1.0,
+           is_deleted: false
          }}
     end
   end
 
   def new(_), do: {:error, "Los parámetros name, latitude y longitude son obligatorios."}
+
+  @doc """
+  Marca la estación como eliminada lógicamente.
+  """
+  @spec delete(t()) :: t()
+  def delete(%__MODULE__{} = station) do
+    %{station | is_deleted: true}
+  end
 end

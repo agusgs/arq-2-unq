@@ -8,7 +8,7 @@ defmodule WeatherFlowWeb.Schemas.SubscriptionRequest do
     description: "Payload necesario para vincular una Estación al usuario",
     type: :object,
     properties: %{
-      station_id: %Schema{type: :string, description: "ID hexagonal de la estación"}
+      station_id: %Schema{type: :string, description: "ID de la estación"}
     },
     required: [:station_id]
   })
