@@ -9,11 +9,9 @@ Nuestra REST API puede experimentarse cómodamente y visualizarse interactivamen
 curl -X POST http://localhost:4000/api/users \
   -H "Content-Type: application/json" \
   -d '{
-    "user": {
-      "first_name": "Ada",
-      "last_name": "Lovelace",
-      "email": "ada@lovelace.com"
-    }
+    "first_name": "Ada",
+    "last_name": "Lovelace",
+    "email": "ada@lovelace.com"
   }'
 ```
 
@@ -32,10 +30,8 @@ curl -X GET http://localhost:4000/api/users/AQUI_TU_USER_ID
 curl -X PUT http://localhost:4000/api/users/AQUI_TU_USER_ID \
   -H "Content-Type: application/json" \
   -d '{
-    "user": {
-      "first_name": "Alan",
-      "last_name": "Turing"
-    }
+    "first_name": "Alan",
+    "last_name": "Turing"
   }'
 ```
 

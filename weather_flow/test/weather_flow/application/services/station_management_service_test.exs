@@ -1,15 +1,8 @@
 defmodule WeatherFlow.Application.Services.StationManagementServiceTest do
-  use ExUnit.Case, async: false
+  use WeatherFlow.DataCase, async: false
 
   alias WeatherFlow.Application.Services.StationManagementService
   alias WeatherFlow.Domain.Station
-  alias WeatherFlow.Adapters.MongoStationRepository
-
-  setup do
-    Mongo.delete_many!(:mongo, "stations", %{})
-    MongoStationRepository.setup_indexes()
-    :ok
-  end
 
   describe "register_station/1" do
     test "registra exitosamente una estación devolviendo su ID" do

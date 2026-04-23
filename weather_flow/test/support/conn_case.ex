@@ -32,6 +32,7 @@ defmodule WeatherFlowWeb.ConnCase do
   end
 
   setup _tags do
+    WeatherFlow.DataCase.setup_db()
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

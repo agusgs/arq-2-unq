@@ -1,16 +1,11 @@
 defmodule WeatherFlow.Application.Services.SubscriptionManagementServiceTest do
-  use ExUnit.Case, async: false
+  use WeatherFlow.DataCase, async: false
 
   alias WeatherFlow.Application.Services.SubscriptionManagementService
   alias WeatherFlow.Adapters.{MongoUserRepository, MongoStationRepository}
   alias WeatherFlow.Domain.{User, Station}
 
   setup do
-    Mongo.delete_many!(:mongo, "users", %{})
-    Mongo.delete_many!(:mongo, "stations", %{})
-    MongoUserRepository.setup_indexes()
-    MongoStationRepository.setup_indexes()
-
     {:ok, %User{} = valid_user} =
       MongoUserRepository.insert(%User{
         first_name: "A",

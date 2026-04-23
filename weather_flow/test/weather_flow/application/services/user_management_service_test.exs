@@ -1,14 +1,7 @@
 defmodule WeatherFlow.Application.Services.UserManagementServiceTest do
-  use ExUnit.Case, async: false
+  use WeatherFlow.DataCase, async: false
 
   alias WeatherFlow.Application.Services.UserManagementService
-  alias WeatherFlow.Adapters.MongoUserRepository
-
-  setup do
-    Mongo.delete_many!(:mongo, "users", %{})
-    MongoUserRepository.setup_indexes()
-    :ok
-  end
 
   describe "register_user/1" do
     test "registra usuario con datos validos impactando en MongoDB" do

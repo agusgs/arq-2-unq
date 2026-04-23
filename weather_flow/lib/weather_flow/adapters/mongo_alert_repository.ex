@@ -19,8 +19,10 @@ defmodule WeatherFlow.Adapters.MongoAlertRepository do
 
   @impl true
   def insert(%Alert{} = alert) do
+    bson_station_id = BSON.ObjectId.decode!(alert.station_id)
+
     doc = %{
-      "station_id" => alert.station_id,
+      "station_id" => bson_station_id,
       "metric" => alert.metric,
       "value" => alert.value,
       "message" => alert.message,
@@ -38,17 +40,21 @@ defmodule WeatherFlow.Adapters.MongoAlertRepository do
 
   @impl true
   def get_by_station_id(station_id) do
+    bson_station_id = BSON.ObjectId.decode!(station_id)
+
     cursor =
-      Mongo.find(:mongo, @collection, %{"station_id" => station_id}, sort: %{"timestamp" => -1})
+      Mongo.find(:mongo, @collection, %{"station_id" => bson_station_id}, sort: %{"timestamp" => -1})
 
     alerts =
       Enum.map(cursor, fn doc ->
         id = BSON.ObjectId.encode!(doc["_id"])
 
+        station_str = BSON.ObjectId.encode!(doc["station_id"])
+
         {:ok, alert} =
           Alert.new(%{
             "id" => id,
-            "station_id" => doc["station_id"],
+            "station_id" => station_str,
             "metric" => doc["metric"],
             "value" => doc["value"],
             "message" => doc["message"],

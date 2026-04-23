@@ -1,14 +1,6 @@
 defmodule WeatherFlowWeb.UserControllerTest do
   use WeatherFlowWeb.ConnCase, async: false
 
-  alias WeatherFlow.Adapters.MongoUserRepository
-
-  setup do
-    Mongo.delete_many!(:mongo, "users", %{})
-    MongoUserRepository.setup_indexes()
-    :ok
-  end
-
   describe "POST /api/users" do
     test "crea exitosamente un usuario devolviendo JSON de creacion", %{conn: conn} do
       payload = %{"first_name" => "Juan", "last_name" => "Pérez", "email" => "juan@test.com"}
@@ -57,9 +49,13 @@ defmodule WeatherFlowWeb.UserControllerTest do
 
   describe "PUT /api/users/:id" do
     test "actualiza correctamente los datos del usuario", %{conn: conn} do
-      conn_created = post(conn, "/api/users", %{
-        "first_name" => "F1", "last_name" => "L1", "email" => "uput@test.com"
-      })
+      conn_created =
+        post(conn, "/api/users", %{
+          "first_name" => "F1",
+          "last_name" => "L1",
+          "email" => "uput@test.com"
+        })
+
       user_id = json_response(conn_created, 201)["id"]
 
       conn_update = put(conn, "/api/users/#{user_id}", %{"first_name" => "F2"})
@@ -69,9 +65,13 @@ defmodule WeatherFlowWeb.UserControllerTest do
 
   describe "DELETE /api/users/:id" do
     test "borra correctamente el usuario devolviendo 204", %{conn: conn} do
-      conn_created = post(conn, "/api/users", %{
-        "first_name" => "FD", "last_name" => "LD", "email" => "udel@test.com"
-      })
+      conn_created =
+        post(conn, "/api/users", %{
+          "first_name" => "FD",
+          "last_name" => "LD",
+          "email" => "udel@test.com"
+        })
+
       user_id = json_response(conn_created, 201)["id"]
 
       conn_delete = delete(conn, "/api/users/#{user_id}")

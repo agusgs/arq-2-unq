@@ -1,14 +1,6 @@
 defmodule WeatherFlowWeb.StationControllerTest do
   use WeatherFlowWeb.ConnCase, async: false
 
-  alias WeatherFlow.Adapters.MongoStationRepository
-
-  setup do
-    Mongo.delete_many!(:mongo, "stations", %{})
-    MongoStationRepository.setup_indexes()
-    :ok
-  end
-
   describe "POST /api/stations" do
     test "crea exitosamente una estación y la retorna codificada en JSON", %{conn: conn} do
       payload = %{
@@ -71,9 +63,11 @@ defmodule WeatherFlowWeb.StationControllerTest do
 
   describe "PUT /api/stations/:id" do
     test "actualiza la estación", %{conn: conn} do
-      conn_created = post(conn, "/api/stations", %{
-        "station" => %{"name" => "S1", "latitude" => 1.0, "longitude" => 1.0}
-      })
+      conn_created =
+        post(conn, "/api/stations", %{
+          "station" => %{"name" => "S1", "latitude" => 1.0, "longitude" => 1.0}
+        })
+
       id = json_response(conn_created, 201)["id"]
 
       conn_update = put(conn, "/api/stations/#{id}", %{"station" => %{"name" => "S2"}})
@@ -83,9 +77,11 @@ defmodule WeatherFlowWeb.StationControllerTest do
 
   describe "DELETE /api/stations/:id" do
     test "borra logicamente la estacion devolviendo 204", %{conn: conn} do
-      conn_created = post(conn, "/api/stations", %{
-        "station" => %{"name" => "SDEL", "latitude" => 1.0, "longitude" => 1.0}
-      })
+      conn_created =
+        post(conn, "/api/stations", %{
+          "station" => %{"name" => "SDEL", "latitude" => 1.0, "longitude" => 1.0}
+        })
+
       id = json_response(conn_created, 201)["id"]
 
       conn_delete = delete(conn, "/api/stations/#{id}")

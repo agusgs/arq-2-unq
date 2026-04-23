@@ -1,16 +1,9 @@
 defmodule WeatherFlow.Application.Services.TelemetryProcessingServiceTest do
-  use ExUnit.Case, async: false
+  use WeatherFlow.DataCase, async: false
 
   alias WeatherFlow.Application.Services.TelemetryProcessingService
-  alias WeatherFlow.Adapters.MongoTelemetryRepository
 
-  setup do
-    Mongo.delete_many!(:mongo, "telemetries", %{})
-    Mongo.delete_many!(:mongo, "stations", %{})
-    Mongo.delete_many!(:mongo, "alerts", %{})
-    MongoTelemetryRepository.setup_indexes()
-    :ok
-  end
+
 
   describe "ingest/1" do
     test "ingesta y guarda datos de telemetria correctamente en la coleccion timeseries" do
