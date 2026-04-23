@@ -21,6 +21,7 @@ defmodule WeatherFlowWeb.Router do
     put "/stations/:id", StationController, :update
     delete "/stations/:id", StationController, :delete
     post "/stations/:station_id/telemetry", TelemetryController, :create
+    get "/telemetry", TelemetryController, :index
     get "/stations/:station_id/alerts", AlertController, :index
 
     post "/users/:user_id/subscriptions", SubscriptionController, :create

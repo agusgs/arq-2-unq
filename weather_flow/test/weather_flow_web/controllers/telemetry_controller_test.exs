@@ -5,6 +5,7 @@ defmodule WeatherFlowWeb.TelemetryControllerTest do
 
   setup do
     Mongo.delete_many!(:mongo, "telemetries", %{})
+    Mongo.delete_many!(:mongo, "stations", %{})
     MongoTelemetryRepository.setup_indexes()
     :ok
   end
@@ -45,6 +46,19 @@ defmodule WeatherFlowWeb.TelemetryControllerTest do
                "error" =>
                  "Todas las lecturas de los sensores deben ser valores numéricos estrictamente."
              } = json_response(conn, 400)
+    end
+  end
+
+  describe "GET /api/telemetry" do
+    test "retorna telemetrías filtradas por temperatura", %{conn: conn} do
+      post(conn, ~p"/api/stations/st1/telemetry", %{"metrics" => %{"temp" => 10.0}})
+      post(conn, ~p"/api/stations/st1/telemetry", %{"metrics" => %{"temp" => 20.0}})
+      
+      conn_get = get(conn, "/api/telemetry?min_temp=15")
+      response = json_response(conn_get, 200)
+      
+      assert length(response) == 1
+      assert hd(response)["metrics"]["temp"] == 20.0
     end
   end
 end

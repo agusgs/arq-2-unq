@@ -60,6 +60,14 @@ defmodule WeatherFlow.Adapters.MongoStationRepository do
   end
 
   @impl true
+  def get_by_name(name) when is_binary(name) do
+    case Mongo.find_one(:mongo, @collection, %{"name" => name}) do
+      nil -> {:error, :not_found}
+      doc -> {:ok, document_to_station(doc)}
+    end
+  end
+
+  @impl true
   def list_all(filters \\ %{}) do
     mongo_filter = build_mongo_filter(filters)
     cursor = Mongo.find(:mongo, @collection, mongo_filter)

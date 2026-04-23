@@ -29,6 +29,16 @@ defmodule WeatherFlow.Application.Services.StationManagementService do
     end
   end
 
+  @spec get_station_by_name(String.t()) ::
+          {:ok, Station.t()} | {:error, :not_found} | {:error, any()}
+  def get_station_by_name(name) do
+    case repository().get_by_name(name) do
+      {:ok, %Station{is_deleted: true}} -> {:error, :not_found}
+      {:ok, station} -> {:ok, station}
+      error -> error
+    end
+  end
+
   @spec list_stations() :: {:ok, [Station.t()]} | {:error, any()}
   def list_stations() do
     repository().list_all(%{is_deleted: false})
