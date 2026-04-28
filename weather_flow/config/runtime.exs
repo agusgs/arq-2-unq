@@ -40,8 +40,22 @@ if config_env() == :prod do
 
   config :weather_flow, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
+  mongo_url = System.get_env("MONGO_URL") || "mongodb://localhost:27017"
+  mongo_database = System.get_env("MONGO_DATABASE") || "weather_flow_prod"
+  mongo_pool_size = String.to_integer(System.get_env("MONGO_POOL_SIZE") || "10")
+
+  config :weather_flow, :mongo,
+    url: mongo_url,
+    database: mongo_database,
+    pool_size: mongo_pool_size
+
+  # URL pública usada por Swagger y redirects. En producción real usar scheme=https y port=443.
+  # En docker local, sobreescribir con PHX_SCHEME=http y PHX_PORT=4000.
+  phx_scheme = System.get_env("PHX_SCHEME", "https")
+  phx_port = String.to_integer(System.get_env("PHX_PORT", "443"))
+
   config :weather_flow, WeatherFlowWeb.Endpoint,
-    url: [host: host, port: 443, scheme: "https"],
+    url: [host: host, port: phx_port, scheme: phx_scheme],
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.

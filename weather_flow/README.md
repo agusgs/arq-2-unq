@@ -34,30 +34,54 @@ Detalles técnicos y diagramas arquitectónicos en la carpeta `/docs`:
 1. [Arquitectura General y Componentes](docs/architecture.md)
 2. [Modelo de Dominio y Validaciones](docs/domain_model.md)
 3. [Esquema de Base de Datos MongoDB](docs/database.md)
+4. [Despliegue y Ambientes](docs/deployment.md)
 
 
 
 ## Configuración y Ejecución Local
 
-1. **Levantar la base de datos (MongoDB local):**
-   ```bash
-   docker-compose up -d
-   ```
-2. **Instalar las dependencias de Elixir:**
-   ```bash
-   mix deps.get
-   ```
-3. **Iniciar el servidor local de Phoenix:**
-   ```bash
-   mix phx.server
-   ```
-   *(También puedes arrancar el servidor dentro de una sesión interactiva de consola usando `iex -S mix phx.server` para debugear)*
+### Opción A — Desarrollo (Recomendado)
+
+MongoDB corre en Docker, Phoenix corre nativo con hot-reload:
+
+```bash
+bash scripts/setup.sh        # solo la primera vez
+bash scripts/dev/start.sh    # levanta MongoDB y Phoenix
+```
+
+Para detener:
+```bash
+bash scripts/dev/stop.sh
+```
+
+### Opción B — Full-Stack con Docker
+
+Todo containerizado (ideal para simular producción):
+
+```bash
+bash scripts/setup.sh        # solo la primera vez (crea el .env)
+# Completar SECRET_KEY_BASE en .env con: mix phx.gen.secret
+bash scripts/prod/start.sh
+```
+
+Para detener:
+```bash
+bash scripts/prod/stop.sh
+```
 
 El servidor quedará a la escucha en [`http://localhost:4000`](http://localhost:4000).
+Ver [docs/deployment.md](docs/deployment.md) para más detalles sobre ambientes y deploy a producción.
 
 ## Tests y Análisis de Calidad
 
-Para correr la suite de pruebas unitarias y de integración (ExUnit):
+Los tests de integración interactúan directamente con MongoDB (usando la base `weather_flow_test`), por lo que **es necesario tener MongoDB corriendo** antes de ejecutarlos.
+
+El mismo servidor levantado para desarrollo sirve:
+```bash
+docker-compose -f docker-compose.dev.yml up -d  # si no está corriendo ya
+```
+
+Luego, para correr la suite completa de pruebas unitarias y de integración:
 ```bash
 mix test
 ```

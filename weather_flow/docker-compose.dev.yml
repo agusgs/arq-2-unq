@@ -1,0 +1,26 @@
+# docker-compose.dev.yml
+#
+# Ambiente de DESARROLLO local.
+# Levanta únicamente la base de datos MongoDB en Docker.
+# La aplicación Phoenix se ejecuta nativa en el host con `mix phx.server`
+# para aprovechar la recarga en caliente (hot-reload) de código.
+#
+# Uso:
+#   docker-compose -f docker-compose.dev.yml up -d
+
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: weather_flow_mongo_dev
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=weather_flow_dev
+    volumes:
+      - mongo_dev_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo_dev_data:

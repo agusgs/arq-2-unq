@@ -20,7 +20,8 @@ defmodule WeatherFlow.MixProject do
           "docs/architecture.md",
           "docs/domain_model.md",
           "docs/database.md",
-          "docs/api_guide.md"
+          "docs/api_guide.md",
+          "docs/deployment.md"
         ],
         before_closing_body_tag: fn
           :html ->

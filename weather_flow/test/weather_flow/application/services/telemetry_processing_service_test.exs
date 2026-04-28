@@ -3,8 +3,6 @@ defmodule WeatherFlow.Application.Services.TelemetryProcessingServiceTest do
 
   alias WeatherFlow.Application.Services.TelemetryProcessingService
 
-
-
   describe "ingest/1" do
     test "ingesta y guarda datos de telemetria correctamente en la coleccion timeseries" do
       attrs = %{
@@ -48,17 +46,28 @@ defmodule WeatherFlow.Application.Services.TelemetryProcessingServiceTest do
       TelemetryProcessingService.ingest(%{"station_id" => "s1", "metrics" => %{"temp" => 10.0}})
       TelemetryProcessingService.ingest(%{"station_id" => "s1", "metrics" => %{"temp" => 20.0}})
       TelemetryProcessingService.ingest(%{"station_id" => "s1", "metrics" => %{"temp" => 30.0}})
-      
-      {:ok, res} = TelemetryProcessingService.search_telemetry(%{"min_temp" => "15", "max_temp" => "25"})
+
+      {:ok, res} =
+        TelemetryProcessingService.search_telemetry(%{"min_temp" => "15", "max_temp" => "25"})
+
       assert length(res) == 1
       assert hd(res).metrics["temp"] == 20.0
     end
 
     test "filtra telemetría dinámicamente por otras métricas como min_hum y max_wind" do
-      TelemetryProcessingService.ingest(%{"station_id" => "s1", "metrics" => %{"temp" => 10.0, "hum" => 40}})
-      TelemetryProcessingService.ingest(%{"station_id" => "s1", "metrics" => %{"temp" => 20.0, "hum" => 50}})
-      
-      {:ok, res} = TelemetryProcessingService.search_telemetry(%{"min_hum" => "45", "max_temp" => "25"})
+      TelemetryProcessingService.ingest(%{
+        "station_id" => "s1",
+        "metrics" => %{"temp" => 10.0, "hum" => 40}
+      })
+
+      TelemetryProcessingService.ingest(%{
+        "station_id" => "s1",
+        "metrics" => %{"temp" => 20.0, "hum" => 50}
+      })
+
+      {:ok, res} =
+        TelemetryProcessingService.search_telemetry(%{"min_hum" => "45", "max_temp" => "25"})
+
       assert length(res) == 1
       assert hd(res).metrics["temp"] == 20.0
     end
@@ -69,12 +78,22 @@ defmodule WeatherFlow.Application.Services.TelemetryProcessingServiceTest do
         "latitude" => -34.0,
         "longitude" => -58.0
       })
-      {:ok, station} = WeatherFlow.Application.Services.StationManagementService.get_station_by_name("Estacion Central")
-      
-      TelemetryProcessingService.ingest(%{"station_id" => station.id, "metrics" => %{"temp" => 10.0}})
+
+      {:ok, station} =
+        WeatherFlow.Application.Services.StationManagementService.get_station_by_name(
+          "Estacion Central"
+        )
+
+      TelemetryProcessingService.ingest(%{
+        "station_id" => station.id,
+        "metrics" => %{"temp" => 10.0}
+      })
+
       TelemetryProcessingService.ingest(%{"station_id" => "s2", "metrics" => %{"temp" => 20.0}})
-      
-      {:ok, res} = TelemetryProcessingService.search_telemetry(%{"station_name" => "Estacion Central"})
+
+      {:ok, res} =
+        TelemetryProcessingService.search_telemetry(%{"station_name" => "Estacion Central"})
+
       assert length(res) == 1
       assert hd(res).station_id == station.id
     end

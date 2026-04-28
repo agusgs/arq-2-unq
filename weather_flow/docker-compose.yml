@@ -1,3 +1,16 @@
+# docker-compose.yml
+#
+# Ambiente FULL-STACK (simulación de producción).
+# Levanta tanto la base de datos MongoDB como la aplicación Phoenix
+# completamente containerizadas.
+#
+# Requiere las siguientes variables de entorno (o un archivo .env):
+#   SECRET_KEY_BASE  - Clave secreta de Phoenix (generada con `mix phx.gen.secret`)
+#   PHX_HOST         - Hostname público de la aplicación (ej: localhost)
+#
+# Uso:
+#   docker-compose up --build
+
 version: '3.8'
 
 services:
@@ -7,9 +20,37 @@ services:
     ports:
       - "27017:27017"
     environment:
-      - MONGO_INITDB_DATABASE=weather_flow_dev
+      - MONGO_INITDB_DATABASE=weather_flow_prod
     volumes:
       - mongo_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weather_flow_app
+    ports:
+      - "4000:4000"
+    environment:
+      - PHX_HOST=${PHX_HOST:-localhost}
+      - PHX_SCHEME=http
+      - PHX_PORT=4000
+      - PORT=4000
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - MONGO_URL=mongodb://mongodb:27017
+      - MONGO_DATABASE=weather_flow_prod
+      - MONGO_POOL_SIZE=10
+      - PHX_SERVER=true
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   mongo_data:

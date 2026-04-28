@@ -15,7 +15,7 @@ defmodule WeatherFlow.Domain.Alert do
         }
 
   @doc """
-  Construye una entidad Alert pura luego de haber sido detectada una anomalía.
+  Construye una entidad Alert pura.
   """
   def new(attrs) do
     station_id = attrs["station_id"] || attrs[:station_id]
