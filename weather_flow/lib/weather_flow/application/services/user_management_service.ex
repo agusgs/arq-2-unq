@@ -36,7 +36,7 @@ defmodule WeatherFlow.Application.Services.UserManagementService do
   Devuelve la colección completa de usuarios del sistema mapeada a Entidades Puras.
   """
   @spec list_users() :: [User.t()]
-  def list_users(), do: repo().get_all()
+  def list_users, do: repo().get_all()
 
   @spec update_user(String.t(), map()) :: {:ok, User.t()} | {:error, any()}
   def update_user(id, params) do

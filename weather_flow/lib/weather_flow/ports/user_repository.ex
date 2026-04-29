@@ -1,4 +1,8 @@
 defmodule WeatherFlow.Ports.UserRepository do
+  @moduledoc """
+  Puerto (contrato) que define las operaciones del repositorio de usuarios.
+  Los adaptadores concretos deben implementar este behaviour.
+  """
   alias WeatherFlow.Domain.User
 
   @callback insert(User.t()) :: {:ok, User.t()} | {:error, any()}

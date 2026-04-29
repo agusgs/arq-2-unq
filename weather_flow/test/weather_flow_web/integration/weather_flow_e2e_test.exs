@@ -67,7 +67,7 @@ defmodule WeatherFlowWeb.Integration.WeatherFlowE2ETest do
     conn_alerts = get(conn, "/api/stations/#{station_id}/alerts")
     alerts_response = json_response(conn_alerts, 200)
 
-    assert length(alerts_response) > 0
+    assert alerts_response != []
     # Deberían ser 2 alertas, una por temperatura y otra por humedad
     assert Enum.any?(alerts_response, fn a -> a["metric"] == "temperature" end)
     assert Enum.any?(alerts_response, fn a -> a["metric"] == "humidity" end)

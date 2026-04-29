@@ -15,21 +15,26 @@ defmodule WeatherFlow.Domain.User do
 
   @spec new(map() | keyword()) :: {:ok, t()} | {:error, String.t()}
   def new(attrs) do
-    case {attrs["first_name"] || attrs[:first_name], attrs["last_name"] || attrs[:last_name],
-          attrs["email"] || attrs[:email]} do
-      {first, last, email} when is_binary(first) and is_binary(last) and is_binary(email) ->
-        user = %__MODULE__{
-          id: attrs["id"] || attrs[:id],
-          first_name: first,
-          last_name: last,
-          email: email,
-          subscriptions: attrs["subscriptions"] || attrs[:subscriptions] || []
-        }
+    with {:ok, first} <- fetch_string(attrs, "first_name", :first_name),
+         {:ok, last} <- fetch_string(attrs, "last_name", :last_name),
+         {:ok, email} <- fetch_string(attrs, "email", :email) do
+      {:ok,
+       %__MODULE__{
+         id: attrs["id"] || attrs[:id],
+         first_name: first,
+         last_name: last,
+         email: email,
+         subscriptions: attrs["subscriptions"] || attrs[:subscriptions] || []
+       }}
+    else
+      _ -> {:error, "first_name, last_name y email son requeridos y deben ser un string"}
+    end
+  end
 
-        {:ok, user}
-
-      _ ->
-        {:error, "first_name, last_name y email son requeridos y deben ser un string"}
+  defp fetch_string(attrs, string_key, atom_key) do
+    case attrs[string_key] || attrs[atom_key] do
+      val when is_binary(val) -> {:ok, val}
+      _ -> :error
     end
   end
 

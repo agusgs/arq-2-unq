@@ -8,7 +8,7 @@ defmodule WeatherFlow.Adapters.MongoStationRepository do
 
   @collection "stations"
 
-  def setup_indexes() do
+  def setup_indexes do
     command = [
       createIndexes: @collection,
       indexes: [
@@ -37,7 +37,7 @@ defmodule WeatherFlow.Adapters.MongoStationRepository do
         string_id = BSON.ObjectId.encode!(bson_id)
         {:ok, %{station | id: string_id}}
 
-      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000} | _]}} ->
+      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11_000} | _]}} ->
         {:error, :name_already_registered}
 
       {:error, reason} ->
@@ -116,7 +116,7 @@ defmodule WeatherFlow.Adapters.MongoStationRepository do
       {:ok, _result} ->
         {:ok, station}
 
-      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000} | _]}} ->
+      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11_000} | _]}} ->
         {:error, :name_already_registered}
 
       {:error, reason} ->

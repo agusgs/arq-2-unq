@@ -5,9 +5,8 @@ defmodule WeatherFlow.Application.Services.AlertProcessingService do
   """
   require Logger
 
-  alias WeatherFlow.Domain.Alert
-  alias WeatherFlow.Adapters.MongoAlertRepository
-  alias WeatherFlow.Adapters.MongoUserRepository
+  alias WeatherFlow.Adapters.{MongoAlertRepository, MongoUserRepository}
+  alias WeatherFlow.Domain.{Alert, AlertRules}
 
   def process_telemetry(telemetry) do
     Enum.each(telemetry.metrics, fn {metric_name, value} ->
@@ -16,7 +15,7 @@ defmodule WeatherFlow.Application.Services.AlertProcessingService do
   end
 
   defp eval_metric(telemetry, metric_name, value) do
-    case WeatherFlow.Domain.AlertRules.evaluate(metric_name, value) do
+    case AlertRules.evaluate(metric_name, value) do
       {:ok, alerts} ->
         Enum.each(alerts, fn message ->
           trigger_alert(telemetry, metric_name, value, message)

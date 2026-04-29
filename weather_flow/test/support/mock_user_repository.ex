@@ -40,7 +40,7 @@ defmodule WeatherFlow.MockUserRepository do
   def get_by_email(_), do: {:error, :not_found}
 
   @impl true
-  def get_all(),
+  def get_all,
     do: [
       %User{
         id: "mock_id_123",

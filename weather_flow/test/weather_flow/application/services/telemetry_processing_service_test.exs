@@ -1,7 +1,7 @@
 defmodule WeatherFlow.Application.Services.TelemetryProcessingServiceTest do
   use WeatherFlow.DataCase, async: false
 
-  alias WeatherFlow.Application.Services.TelemetryProcessingService
+  alias WeatherFlow.Application.Services.{StationManagementService, TelemetryProcessingService}
 
   describe "ingest/1" do
     test "ingesta y guarda datos de telemetria correctamente en la coleccion timeseries" do
@@ -73,14 +73,14 @@ defmodule WeatherFlow.Application.Services.TelemetryProcessingServiceTest do
     end
 
     test "filtra telemetría por nombre de estación" do
-      WeatherFlow.Application.Services.StationManagementService.register_station(%{
+      StationManagementService.register_station(%{
         "name" => "Estacion Central",
         "latitude" => -34.0,
         "longitude" => -58.0
       })
 
       {:ok, station} =
-        WeatherFlow.Application.Services.StationManagementService.get_station_by_name(
+        StationManagementService.get_station_by_name(
           "Estacion Central"
         )
 

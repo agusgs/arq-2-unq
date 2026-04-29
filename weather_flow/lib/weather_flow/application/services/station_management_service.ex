@@ -40,7 +40,7 @@ defmodule WeatherFlow.Application.Services.StationManagementService do
   end
 
   @spec list_stations() :: {:ok, [Station.t()]} | {:error, any()}
-  def list_stations() do
+  def list_stations do
     repository().list_all(%{is_deleted: false})
   end
 

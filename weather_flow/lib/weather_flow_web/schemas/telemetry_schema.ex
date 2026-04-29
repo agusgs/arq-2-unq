@@ -1,4 +1,5 @@
 defmodule WeatherFlowWeb.Schemas.TelemetryRequest do
+  @moduledoc false
   require OpenApiSpex
   alias OpenApiSpex.Schema
 
@@ -25,6 +26,7 @@ defmodule WeatherFlowWeb.Schemas.TelemetryRequest do
 end
 
 defmodule WeatherFlowWeb.Schemas.TelemetryResponse do
+  @moduledoc false
   require OpenApiSpex
   alias OpenApiSpex.Schema
 

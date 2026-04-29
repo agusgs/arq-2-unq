@@ -19,19 +19,26 @@ defmodule WeatherFlow.DataCase do
     :ok
   end
 
+  alias WeatherFlow.Adapters.{
+    MongoAlertRepository,
+    MongoStationRepository,
+    MongoTelemetryRepository,
+    MongoUserRepository
+  }
+
   @doc """
   Limpia todas las colecciones y regenera los índices básicos.
   """
-  def setup_db() do
+  def setup_db do
     Mongo.delete_many!(:mongo, "users", %{})
     Mongo.delete_many!(:mongo, "stations", %{})
     Mongo.delete_many!(:mongo, "telemetries", %{})
     Mongo.delete_many!(:mongo, "alerts", %{})
 
-    WeatherFlow.Adapters.MongoUserRepository.setup_indexes()
-    WeatherFlow.Adapters.MongoStationRepository.setup_indexes()
-    WeatherFlow.Adapters.MongoTelemetryRepository.setup_indexes()
-    WeatherFlow.Adapters.MongoAlertRepository.setup_indexes()
+    MongoUserRepository.setup_indexes()
+    MongoStationRepository.setup_indexes()
+    MongoTelemetryRepository.setup_indexes()
+    MongoAlertRepository.setup_indexes()
 
     :ok
   end

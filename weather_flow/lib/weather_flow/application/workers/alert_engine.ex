@@ -7,6 +7,8 @@ defmodule WeatherFlow.Application.Workers.AlertEngine do
   use GenServer
   require Logger
 
+  alias WeatherFlow.Application.Services.AlertProcessingService
+
   @topic "telemetry_stream"
 
   def start_link(_opts) do
@@ -26,7 +28,7 @@ defmodule WeatherFlow.Application.Workers.AlertEngine do
 
   @impl true
   def handle_info({:telemetry_inserted, telemetry}, state) do
-    WeatherFlow.Application.Services.AlertProcessingService.process_telemetry(telemetry)
+    AlertProcessingService.process_telemetry(telemetry)
     {:noreply, state}
   end
 end

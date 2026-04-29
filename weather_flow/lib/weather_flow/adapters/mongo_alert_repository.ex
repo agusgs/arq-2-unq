@@ -1,11 +1,14 @@
 defmodule WeatherFlow.Adapters.MongoAlertRepository do
+  @moduledoc """
+  Implementación en MongoDB para el repositorio de alertas.
+  """
   @behaviour WeatherFlow.Ports.AlertRepository
 
   alias WeatherFlow.Domain.Alert
 
   @collection "alerts"
 
-  def setup_indexes() do
+  def setup_indexes do
     Mongo.command(:mongo,
       createIndexes: @collection,
       indexes: [

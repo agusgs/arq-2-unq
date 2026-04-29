@@ -1,10 +1,9 @@
 defmodule WeatherFlow.Application.Services.AlertProcessingServiceTest do
   use WeatherFlow.DataCase, async: false
 
-  alias WeatherFlow.Adapters.MongoAlertRepository
-  alias WeatherFlow.Adapters.MongoUserRepository
-  alias WeatherFlow.Domain.Telemetry
+  alias WeatherFlow.Adapters.{MongoAlertRepository, MongoUserRepository}
   alias WeatherFlow.Application.Services.AlertProcessingService
+  alias WeatherFlow.Domain.Telemetry
 
   test "Genera y persiste alerta si temp es > 35, y notifica a los suscritos" do
     {:ok, _user} =

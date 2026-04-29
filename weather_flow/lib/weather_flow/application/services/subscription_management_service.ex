@@ -4,8 +4,8 @@ defmodule WeatherFlow.Application.Services.SubscriptionManagementService do
   usuarios a las estaciones meteorológicas.
   """
 
-  alias WeatherFlow.Domain.User
   alias WeatherFlow.Application.Services.StationManagementService
+  alias WeatherFlow.Domain.User
 
   defp user_repo,
     do:

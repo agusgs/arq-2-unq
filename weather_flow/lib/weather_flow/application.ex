@@ -5,6 +5,13 @@ defmodule WeatherFlow.Application do
 
   use Application
 
+  alias WeatherFlow.Adapters.{
+    MongoAlertRepository,
+    MongoStationRepository,
+    MongoTelemetryRepository,
+    MongoUserRepository
+  }
+
   @impl true
   def start(_type, _args) do
     mongo_config =
@@ -33,10 +40,10 @@ defmodule WeatherFlow.Application do
 
     if match?({:ok, _}, result) do
       Task.start(fn ->
-        WeatherFlow.Adapters.MongoUserRepository.setup_indexes()
-        WeatherFlow.Adapters.MongoStationRepository.setup_indexes()
-        WeatherFlow.Adapters.MongoTelemetryRepository.setup_indexes()
-        WeatherFlow.Adapters.MongoAlertRepository.setup_indexes()
+        MongoUserRepository.setup_indexes()
+        MongoStationRepository.setup_indexes()
+        MongoTelemetryRepository.setup_indexes()
+        MongoAlertRepository.setup_indexes()
       end)
     end
 

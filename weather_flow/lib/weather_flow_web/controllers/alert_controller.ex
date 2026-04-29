@@ -28,7 +28,7 @@ defmodule WeatherFlowWeb.AlertController do
 
   def index(conn, %{"station_id" => station_id}) do
     {:ok, alerts} = MongoAlertRepository.get_by_station_id(station_id)
-    
+
     conn
     |> put_status(:ok)
     |> json(Enum.map(alerts, fn %Alert{} = alert ->

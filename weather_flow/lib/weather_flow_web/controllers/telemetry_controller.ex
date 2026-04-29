@@ -34,7 +34,7 @@ defmodule WeatherFlowWeb.TelemetryController do
     ]
   )
 
-  def create(conn, params = %{"station_id" => station_id}) do
+  def create(conn, %{"station_id" => station_id} = params) do
     attrs = %{
       "station_id" => station_id,
       "metrics" => Map.get(params, "metrics", %{}),

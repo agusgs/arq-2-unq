@@ -1,4 +1,5 @@
 defmodule WeatherFlowWeb.Schemas.Alert do
+  @moduledoc false
   require OpenApiSpex
   alias OpenApiSpex.Schema
 

@@ -1,9 +1,9 @@
 defmodule WeatherFlow.Application.Services.SubscriptionManagementServiceTest do
   use WeatherFlow.DataCase, async: false
 
+  alias WeatherFlow.Adapters.{MongoStationRepository, MongoUserRepository}
   alias WeatherFlow.Application.Services.SubscriptionManagementService
-  alias WeatherFlow.Adapters.{MongoUserRepository, MongoStationRepository}
-  alias WeatherFlow.Domain.{User, Station}
+  alias WeatherFlow.Domain.{Station, User}
 
   setup do
     {:ok, %User{} = valid_user} =

@@ -1,11 +1,14 @@
 defmodule WeatherFlow.Adapters.MongoUserRepository do
+  @moduledoc """
+  Implementación en MongoDB para el repositorio de usuarios.
+  """
   @behaviour WeatherFlow.Ports.UserRepository
 
   alias WeatherFlow.Domain.User
 
   @collection "users"
 
-  def setup_indexes() do
+  def setup_indexes do
     command = [
       createIndexes: @collection,
       indexes: [
@@ -25,7 +28,7 @@ defmodule WeatherFlow.Adapters.MongoUserRepository do
         string_id = BSON.ObjectId.encode!(bson_id)
         {:ok, %{user | id: string_id}}
 
-      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000} | _]}} ->
+      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11_000} | _]}} ->
         {:error, :email_already_registered}
 
       {:error, reason} ->
@@ -56,7 +59,7 @@ defmodule WeatherFlow.Adapters.MongoUserRepository do
   end
 
   @impl true
-  def get_all() do
+  def get_all do
     Mongo.find(:mongo, @collection, %{})
     |> Enum.to_list()
     |> Enum.map(&document_to_user/1)
@@ -78,7 +81,7 @@ defmodule WeatherFlow.Adapters.MongoUserRepository do
       {:ok, _result} ->
         {:ok, user}
 
-      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11000} | _]}} ->
+      {:error, %Mongo.WriteError{write_errors: [%{"code" => 11_000} | _]}} ->
         {:error, :email_already_registered}
 
       {:error, reason} ->

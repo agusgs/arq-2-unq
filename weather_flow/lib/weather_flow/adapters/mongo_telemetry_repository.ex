@@ -10,7 +10,7 @@ defmodule WeatherFlow.Adapters.MongoTelemetryRepository do
   @collection "telemetries"
 
   @doc "Construye la tabla TimeSeries la primera vez."
-  def setup_indexes() do
+  def setup_indexes do
     command = [
       create: @collection,
       timeseries: [
@@ -167,7 +167,7 @@ defmodule WeatherFlow.Adapters.MongoTelemetryRepository do
       end
 
     {:ok, telemetry} =
-      WeatherFlow.Domain.Telemetry.new(%{
+      Telemetry.new(%{
         "id" => string_id,
         "station_id" => station_id,
         "metrics" => Map.get(doc, "metrics"),

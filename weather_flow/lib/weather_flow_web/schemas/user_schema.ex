@@ -1,4 +1,5 @@
 defmodule WeatherFlowWeb.Schemas.User do
+  @moduledoc false
   require OpenApiSpex
   alias OpenApiSpex.Schema
 
@@ -24,6 +25,7 @@ defmodule WeatherFlowWeb.Schemas.User do
 end
 
 defmodule WeatherFlowWeb.Schemas.UserRequest do
+  @moduledoc false
   require OpenApiSpex
   alias OpenApiSpex.Schema
 

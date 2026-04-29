@@ -3,6 +3,7 @@ defmodule WeatherFlow.Application.Services.TelemetryProcessingService do
   Servicio responsable de la ingesta de telemetría proveniente de
   las estaciones meteorológicas.
   """
+  alias WeatherFlow.Application.Services.StationManagementService
   alias WeatherFlow.Domain.Telemetry
 
   defp repo do
@@ -110,7 +111,7 @@ defmodule WeatherFlow.Application.Services.TelemetryProcessingService do
   defp resolve_and_put_station_id(filters, nil), do: {:ok, filters}
 
   defp resolve_and_put_station_id(filters, name) do
-    case WeatherFlow.Application.Services.StationManagementService.get_station_by_name(name) do
+    case StationManagementService.get_station_by_name(name) do
       {:ok, station} -> {:ok, Map.put(filters, :station_id, station.id)}
       {:error, :not_found} -> {:error, :not_found}
       error -> error

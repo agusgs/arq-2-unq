@@ -1,6 +1,8 @@
 defmodule WeatherFlowWeb.ApiSpec do
   @moduledoc false
-  alias OpenApiSpex.{Info, Server, Components, OpenApi}
+  alias OpenApiSpex.{Components, Info, OpenApi, Server}
+
+  alias WeatherFlowWeb.Schemas
 
   @behaviour OpenApiSpex.OpenApi
 
@@ -17,14 +19,14 @@ defmodule WeatherFlowWeb.ApiSpec do
       ],
       components: %Components{
         schemas: %{
-          "User" => WeatherFlowWeb.Schemas.User.schema(),
-          "UserRequest" => WeatherFlowWeb.Schemas.UserRequest.schema(),
-          "Station" => WeatherFlowWeb.Schemas.Station.schema(),
-          "StationRequest" => WeatherFlowWeb.Schemas.StationRequest.schema(),
-          "SubscriptionRequest" => WeatherFlowWeb.Schemas.SubscriptionRequest.schema(),
-          "TelemetryRequest" => WeatherFlowWeb.Schemas.TelemetryRequest.schema(),
-          "TelemetryResponse" => WeatherFlowWeb.Schemas.TelemetryResponse.schema(),
-          "Alert" => WeatherFlowWeb.Schemas.Alert.schema()
+          "User" => Schemas.User.schema(),
+          "UserRequest" => Schemas.UserRequest.schema(),
+          "Station" => Schemas.Station.schema(),
+          "StationRequest" => Schemas.StationRequest.schema(),
+          "SubscriptionRequest" => Schemas.SubscriptionRequest.schema(),
+          "TelemetryRequest" => Schemas.TelemetryRequest.schema(),
+          "TelemetryResponse" => Schemas.TelemetryResponse.schema(),
+          "Alert" => Schemas.Alert.schema()
         }
       },
       paths: OpenApiSpex.Paths.from_router(WeatherFlowWeb.Router)

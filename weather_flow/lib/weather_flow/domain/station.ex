@@ -20,34 +20,54 @@ defmodule WeatherFlow.Domain.Station do
   """
   @spec new(map()) :: {:ok, t()} | {:error, String.t()}
   def new(%{"name" => name, "latitude" => lat, "longitude" => lon}) do
-    cond do
-      is_nil(name) or String.trim(name) == "" ->
-        {:error, "El nombre de la estación es obligatorio."}
-
-      not is_float(lat) and not is_integer(lat) ->
-        {:error, "La latitud debe ser un número."}
-
-      not is_float(lon) and not is_integer(lon) ->
-        {:error, "La longitud debe ser un número."}
-
-      lat < -90.0 or lat > 90.0 ->
-        {:error, "La latitud debe estar comprendida entre -90.0 y 90.0 grados."}
-
-      lon < -180.0 or lon > 180.0 ->
-        {:error, "La longitud debe estar comprendida entre -180.0 y 180.0 grados."}
-
-      true ->
-        {:ok,
-         %__MODULE__{
-           name: String.trim(name),
-           latitude: lat * 1.0,
-           longitude: lon * 1.0,
-           is_deleted: false
-         }}
+    with :ok <- validate_name(name),
+         :ok <- validate_numeric(lat, "latitud"),
+         :ok <- validate_numeric(lon, "longitud"),
+         :ok <- validate_latitude(lat),
+         :ok <- validate_longitude(lon) do
+      {:ok,
+       %__MODULE__{
+         name: String.trim(name),
+         latitude: lat * 1.0,
+         longitude: lon * 1.0,
+         is_deleted: false
+       }}
     end
   end
 
   def new(_), do: {:error, "Los parámetros name, latitude y longitude son obligatorios."}
+
+  defp validate_name(name) do
+    if is_nil(name) or String.trim(name) == "" do
+      {:error, "El nombre de la estación es obligatorio."}
+    else
+      :ok
+    end
+  end
+
+  defp validate_numeric(val, field) do
+    if is_float(val) or is_integer(val) do
+      :ok
+    else
+      {:error, "La #{field} debe ser un número."}
+    end
+  end
+
+  defp validate_latitude(lat) do
+    if lat >= -90.0 and lat <= 90.0 do
+      :ok
+    else
+      {:error, "La latitud debe estar comprendida entre -90.0 y 90.0 grados."}
+    end
+  end
+
+  defp validate_longitude(lon) do
+    if lon >= -180.0 and lon <= 180.0 do
+      :ok
+    else
+      {:error, "La longitud debe estar comprendida entre -180.0 y 180.0 grados."}
+    end
+  end
 
   @doc """
   Marca la estación como eliminada lógicamente.
