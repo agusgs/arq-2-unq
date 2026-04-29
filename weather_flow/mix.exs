@@ -32,7 +32,7 @@ defmodule WeatherFlow.MixProject do
             """
             <script src="https://cdn.jsdelivr.net/npm/mermaid@10.2.3/dist/mermaid.min.js"></script>
             <script>
-              document.addEventListener("DOMContentLoaded", function () {
+              function renderMermaid() {
                 const isDark = document.documentElement.classList.contains("dark") ||
                                (!document.documentElement.classList.contains("light") && window.matchMedia("(prefers-color-scheme: dark)").matches);
                 mermaid.initialize({ startOnLoad: false, theme: isDark ? "dark" : "default" });
@@ -47,9 +47,15 @@ defmodule WeatherFlow.MixProject do
                     bindFunctions?.(graphEl);
                     preEl.insertAdjacentElement("afterend", graphEl);
                     preEl.remove();
-                  });
+                  }).catch(e => console.error("Mermaid render error:", e));
                 }
-              });
+              }
+
+              if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", renderMermaid);
+              } else {
+                renderMermaid();
+              }
             </script>
             """
 
