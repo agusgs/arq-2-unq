@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+env:
+  MIX_ENV: test
+  ELIXIR_VERSION: "1.19"
+  OTP_VERSION: "27"
+
+# El proyecto Elixir vive en el subdirectorio weather_flow/
+defaults:
+  run:
+    working-directory: weather_flow
+
+jobs:
+  # ─────────────────────────────────────────────────
+  # Job 1: Tests + Credo
+  # Requiere MongoDB como servicio para los tests de integración.
+  # ─────────────────────────────────────────────────
+  test:
+    name: Tests & Credo
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:5.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Elixir / OTP
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
+
+      - name: Cache dependencias de Mix
+        uses: actions/cache@v4
+        with:
+          path: |
+            weather_flow/deps
+            weather_flow/_build
+          key: ${{ runner.os }}-mix-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('weather_flow/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-
+
+      - name: Instalar dependencias
+        run: mix deps.get
+
+      - name: Compilar (warnings como errores)
+        run: mix compile --warnings-as-errors
+
+      - name: Credo (análisis estático)
+        run: mix credo --strict
+
+      - name: Tests
+        run: mix test --warnings-as-errors
+
+  # ─────────────────────────────────────────────────
+  # Job 2: Dialyzer (análisis de tipos)
+  # Se corre en paralelo con tests. El PLT se cachea para
+  # que las corridas subsiguientes no tarden varios minutos.
+  # ─────────────────────────────────────────────────
+  dialyzer:
+    name: Dialyzer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Elixir / OTP
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
+
+      - name: Cache dependencias de Mix
+        uses: actions/cache@v4
+        with:
+          path: |
+            weather_flow/deps
+            weather_flow/_build
+          key: ${{ runner.os }}-mix-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('weather_flow/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-
+
+      # El PLT (Persistent Lookup Table) que usa Dialyzer tarda ~5min en generarse.
+      # Lo cacheamos por versión de dependencias para que solo se regenere cuando
+      # cambia el mix.lock.
+      - name: Cache PLT de Dialyzer
+        id: plt-cache
+        uses: actions/cache@v4
+        with:
+          path: weather_flow/priv/plts
+          key: ${{ runner.os }}-plts-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('weather_flow/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-plts-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-
+
+      - name: Instalar dependencias
+        run: mix deps.get
+
+      - name: Generar PLT (solo si no está cacheado)
+        if: steps.plt-cache.outputs.cache-hit != 'true'
+        run: mix dialyzer --plt
+
+      - name: Dialyzer
+        run: mix dialyzer --format github

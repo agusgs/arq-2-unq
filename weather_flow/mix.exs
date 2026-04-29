@@ -11,6 +11,10 @@ defmodule WeatherFlow.MixProject do
       aliases: aliases(),
       deps: deps(),
       listeners: [Phoenix.CodeReloader],
+      dialyzer: [
+        plt_file: {:no_warn, "priv/plts/project.plt"},
+        plt_add_apps: [:mix, :ex_unit]
+      ],
       name: "WeatherFlow",
       source_url: "https://github.com/agusgs/arq-2-unq",
       docs: [
@@ -48,7 +52,9 @@ defmodule WeatherFlow.MixProject do
               });
             </script>
             """
-          _ -> ""
+
+          _ ->
+            ""
         end
       ]
     ]

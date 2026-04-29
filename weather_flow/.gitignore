@@ -32,3 +32,4 @@ weather_flow-*.tar
 # Archivos de proceso Phoenix (generados por scripts/dev/)
 .phoenix.pid
 .phoenix.log
+priv/plts/
