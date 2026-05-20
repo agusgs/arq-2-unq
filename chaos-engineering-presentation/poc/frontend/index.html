@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Chaos Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="max-w-4xl w-full bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
+        <div class="bg-gray-900 p-6 border-b border-gray-700 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-pink-500">E-Commerce Monitor 🛒</h1>
+                <p class="text-gray-400 mt-1 text-sm">Validación de Resiliencia Avanzada (SRE)</p>
+            </div>
+            <div id="statusIndicator" class="h-6 w-6 rounded-full bg-green-500 pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]"></div>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Fila 1: Gateway y Ventas -->
+            <div class="grid grid-cols-3 gap-4">
+                <!-- Tarjeta Gateway -->
+                <div class="bg-gray-700 p-4 rounded-lg flex flex-col justify-between">
+                    <p class="text-sm text-gray-400 uppercase font-semibold">Gateway (API)</p>
+                    <p id="gatewayStatus" class="text-xl font-bold mt-1 text-green-400">Saludable ✅</p>
+                    <p id="gatewayTime" class="text-xs text-gray-400 mt-2">Latencia: 0 ms</p>
+                </div>
+
+                <!-- Tarjeta CPU Gateway -->
+                <div class="bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center border-2 border-transparent transition-colors duration-300" id="cpuGatewayCard">
+                    <p class="text-sm text-gray-400 uppercase font-semibold">CPU Gateway</p>
+                    <p id="cpuGatewayMetric" class="text-4xl font-black text-gray-300 font-mono mt-2">--%</p>
+                </div>
+
+                <!-- Ventas Totales -->
+                <div class="bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center">
+                    <p class="text-sm text-gray-400 uppercase font-semibold">Ventas Totales</p>
+                    <p id="dbHits" class="text-4xl font-black text-blue-400 font-mono mt-2">0</p>
+                </div>
+            </div>
+
+            <!-- Fila 2: Sugerencias y CPU -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Tarjeta Sugerencias -->
+                <div class="bg-gray-700 p-4 rounded-lg flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <p class="text-sm text-gray-400 uppercase font-semibold">Sugerencias</p>
+                        <span id="cbStatus" class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-900 text-green-300 border border-green-500">CB: CERRADO 🟢</span>
+                    </div>
+                    <p id="suggestionsStatus" class="text-xl font-bold mt-1 text-green-400">Saludable ✅</p>
+                    <div id="suggestionsItems" class="text-xs text-gray-400 mt-2">Ítems: 0</div>
+                    <p id="suggestionsTime" class="text-xs text-gray-400 mt-1">Latencia: 0 ms</p>
+                </div>
+
+                <!-- Tarjeta CPU -->
+                <div class="bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center border-2 border-transparent transition-colors duration-300" id="cpuCard">
+                    <p class="text-sm text-gray-400 uppercase font-semibold">CPU Sugerencias</p>
+                    <p id="cpuMetric" class="text-4xl font-black text-gray-300 font-mono mt-2">--%</p>
+                </div>
+            </div>
+
+            <!-- Panel de CPS Simulador -->
+            <div class="bg-gray-700 p-4 rounded-lg flex items-center justify-between border-l-4 border-green-500" id="cpsPanel">
+                <div>
+                    <p class="text-sm text-gray-400 uppercase font-semibold">Métrica de Negocio (Throughput)</p>
+                    <p class="text-xs text-gray-300 mt-1">Compras por Segundo (CPS) procesadas por el frontend.</p>
+                </div>
+                <div class="text-right">
+                    <p id="cpsMetric" class="text-4xl font-black text-green-400">0 CPS</p>
+                </div>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-400 uppercase font-semibold mb-2">Últimos Eventos</p>
+                <div id="eventLog" class="bg-black p-3 rounded text-xs font-mono h-32 overflow-y-auto space-y-1 text-gray-300">
+                    <div><span class="text-green-400">[INFO]</span> Iniciando tráfico de usuarios simulado...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/checkout';
+        const CPU_URL = 'http://localhost:8001/api/cpu';
+        
+        const ui = {
+            indicator: document.getElementById('statusIndicator'),
+            gatewayStatus: document.getElementById('gatewayStatus'),
+            gatewayTime: document.getElementById('gatewayTime'),
+            suggestionsStatus: document.getElementById('suggestionsStatus'),
+            suggestionsItems: document.getElementById('suggestionsItems'),
+            suggestionsTime: document.getElementById('suggestionsTime'),
+            cbStatus: document.getElementById('cbStatus'),
+            hitsText: document.getElementById('dbHits'),
+            cpsMetric: document.getElementById('cpsMetric'),
+            cpsPanel: document.getElementById('cpsPanel'),
+            cpuMetric: document.getElementById('cpuMetric'),
+            cpuCard: document.getElementById('cpuCard'),
+            cpuGatewayMetric: document.getElementById('cpuGatewayMetric'),
+            cpuGatewayCard: document.getElementById('cpuGatewayCard'),
+            log: document.getElementById('eventLog')
+        };
+
+        function addLog(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'text-red-400' : (type === 'warn' ? 'text-yellow-400' : 'text-green-400');
+            const prefix = type === 'error' ? '[ERROR]' : (type === 'warn' ? '[WARN]' : '[INFO]');
+
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="text-gray-500">${time}</span> <span class="${color}">${prefix}</span> ${msg}`;
+            ui.log.prepend(div);
+
+            if (ui.log.children.length > 20) {
+                ui.log.removeChild(ui.log.lastChild);
+            }
+        }
+
+        let successfulRequests = 0;
+        let lastSuccessfulRequests = 0;
+        let lastCircuitState = "CLOSED";
+
+        const GATEWAY_CPU_URL = 'http://localhost:8000/api/cpu';
+
+        // Monitor de CPU (Sugerencias)
+        setInterval(async () => {
+            try {
+                const response = await fetch(CPU_URL);
+                if (response.ok) {
+                    const data = await response.json();
+                    const cpu = data.cpu;
+                    ui.cpuMetric.textContent = `${cpu.toFixed(1)}%`;
+                    
+                    if (cpu > 80) {
+                        ui.cpuMetric.className = "text-4xl font-black text-red-500 font-mono mt-2";
+                        ui.cpuCard.className = "bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center border-2 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-colors duration-300";
+                    } else if (cpu > 50) {
+                        ui.cpuMetric.className = "text-4xl font-black text-yellow-400 font-mono mt-2";
+                        ui.cpuCard.className = "bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center border-2 border-yellow-500 transition-colors duration-300";
+                    } else {
+                        ui.cpuMetric.className = "text-4xl font-black text-green-400 font-mono mt-2";
+                        ui.cpuCard.className = "bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center border-2 border-transparent transition-colors duration-300";
+                    }
+                }
+            } catch (e) {
+                ui.cpuMetric.textContent = "ERR";
+                ui.cpuMetric.className = "text-4xl font-black text-gray-500 font-mono mt-2";
+                ui.cpuCard.className = "bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center border-2 border-transparent";
+            }
+        }, 1000);
+
+        // Monitor de CPU (Gateway)
+        setInterval(async () => {
+            try {
+                const response = await fetch(GATEWAY_CPU_URL);
+                if (response.ok) {
+                    const data = await response.json();
+                    const cpu = data.cpu;
+                    ui.cpuGatewayMetric.textContent = `${cpu.toFixed(1)}%`;
+                    
+                    if (cpu > 80) {
+                        ui.cpuGatewayMetric.className = "text-4xl font-black text-red-500 font-mono mt-2";
+                        ui.cpuGatewayCard.className = "bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center border-2 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-colors duration-300";
+                    } else if (cpu > 50) {
+                        ui.cpuGatewayMetric.className = "text-4xl font-black text-yellow-400 font-mono mt-2";
+                        ui.cpuGatewayCard.className = "bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center border-2 border-yellow-500 transition-colors duration-300";
+                    } else {
+                        ui.cpuGatewayMetric.className = "text-4xl font-black text-green-400 font-mono mt-2";
+                        ui.cpuGatewayCard.className = "bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center border-2 border-transparent transition-colors duration-300";
+                    }
+                }
+            } catch (e) {
+                ui.cpuGatewayMetric.textContent = "ERR";
+                ui.cpuGatewayMetric.className = "text-4xl font-black text-gray-500 font-mono mt-2";
+                ui.cpuGatewayCard.className = "bg-gray-700 p-4 rounded-lg text-center flex flex-col justify-center border-2 border-transparent";
+            }
+        }, 1000);
+
+        // Monitor de CPS (Throughput)
+        setInterval(() => {
+            const currentCps = successfulRequests - lastSuccessfulRequests;
+            lastSuccessfulRequests = successfulRequests;
+            
+            ui.cpsMetric.textContent = `${currentCps} CPS`;
+            
+            if (currentCps === 0) {
+                ui.cpsMetric.className = "text-4xl font-black text-red-500";
+                ui.cpsPanel.className = "bg-gray-700 p-4 rounded-lg flex items-center justify-between border-l-4 border-red-500";
+            } else if (currentCps < 5) {
+                ui.cpsMetric.className = "text-4xl font-black text-yellow-400";
+                ui.cpsPanel.className = "bg-gray-700 p-4 rounded-lg flex items-center justify-between border-l-4 border-yellow-500";
+            } else {
+                ui.cpsMetric.className = "text-4xl font-black text-green-400";
+                ui.cpsPanel.className = "bg-gray-700 p-4 rounded-lg flex items-center justify-between border-l-4 border-green-500";
+            }
+        }, 1000);
+
+        function updateCircuitBreakerBadge(state) {
+            if (state !== lastCircuitState) {
+                addLog(`Circuit Breaker cambió a estado: ${state}`, state === 'OPEN' ? 'error' : (state === 'HALF_OPEN' ? 'warn' : 'info'));
+                lastCircuitState = state;
+            }
+
+            if (state === 'OPEN') {
+                ui.cbStatus.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-red-900 text-red-300 border border-red-500 animate-pulse";
+                ui.cbStatus.textContent = "CB: ABIERTO 🔴";
+            } else if (state === 'HALF_OPEN') {
+                ui.cbStatus.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-900 text-yellow-300 border border-yellow-500";
+                ui.cbStatus.textContent = "CB: TEST 🟡";
+            } else {
+                ui.cbStatus.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-green-900 text-green-300 border border-green-500";
+                ui.cbStatus.textContent = "CB: CERRADO 🟢";
+            }
+        }
+
+        async function doCheckout() {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(API_URL, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) throw new Error('API retornó ' + response.status);
+
+                const data = await response.json();
+
+                ui.gatewayTime.textContent = `Latencia: ${data.response_time_ms} ms`;
+                ui.hitsText.textContent = data.db_hits;
+                
+                if (data.circuit_state) {
+                    updateCircuitBreakerBadge(data.circuit_state);
+                }
+                
+                if (data.suggestions_time_ms !== undefined) {
+                    if (data.suggestions_time_ms > 0) {
+                        ui.suggestionsTime.textContent = `Latencia: ${data.suggestions_time_ms} ms`;
+                    } else {
+                        ui.suggestionsTime.textContent = `Latencia: 0 ms (Fail-Fast)`;
+                    }
+                }
+
+                if (data.status === 'success') {
+                    successfulRequests++;
+                    ui.indicator.className = 'h-6 w-6 rounded-full bg-green-500 pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]';
+                    ui.gatewayStatus.textContent = 'Saludable ✅';
+                    ui.gatewayStatus.className = 'text-xl font-bold mt-1 text-green-400';
+                    
+                    if (data.suggestions_status === 'ok') {
+                        ui.suggestionsStatus.textContent = 'Saludable ✅';
+                        ui.suggestionsStatus.className = 'text-xl font-bold mt-1 text-green-400';
+                        ui.suggestionsItems.innerHTML = `Ítems: ${data.suggestions.length}`;
+                    } else if (data.suggestions_status === 'fallback') {
+                        ui.suggestionsStatus.textContent = 'Degradado ⚠️';
+                        ui.suggestionsStatus.className = 'text-xl font-bold mt-1 text-yellow-400';
+                        ui.suggestionsItems.innerHTML = `<span class="bg-blue-900 text-blue-300 border border-blue-500 px-1 rounded inline-block mt-1">[Desde Caché] 🗃️</span>`;
+                        if (successfulRequests % 20 === 0) addLog('Sugerencias falló. Retornando desde Caché.', 'warn');
+                    } else {
+                        ui.suggestionsStatus.textContent = 'Fallo Parcial ⚠️';
+                        ui.suggestionsStatus.className = 'text-xl font-bold mt-1 text-yellow-400';
+                        ui.suggestionsItems.textContent = `Sin ítems`;
+                    }
+                } else {
+                    ui.indicator.className = 'h-6 w-6 rounded-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]';
+                    ui.gatewayStatus.textContent = '¡Fuego! 🔥';
+                    ui.gatewayStatus.className = 'text-xl font-bold mt-1 text-red-500 animate-bounce';
+                    addLog(data.message, 'error');
+                }
+
+            } catch (error) {
+                ui.indicator.className = 'h-6 w-6 rounded-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]';
+                ui.gatewayStatus.textContent = '¡Caído! 💥';
+                ui.gatewayStatus.className = 'text-xl font-bold mt-1 text-red-500 animate-bounce';
+                ui.gatewayTime.textContent = 'Latencia: ∞';
+                ui.suggestionsTime.textContent = 'Latencia: ∞';
+                addLog('Fallo en el Gateway (API Caída)', 'error');
+            }
+        }
+
+        // Iniciamos el tráfico de forma controlada
+        async function startTraffic() {
+            while (true) {
+                await doCheckout();
+                // Esperamos 100ms entre el FIN de una petición y el INICIO de la siguiente
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+        }
+        
+        startTraffic();
+    </script>
+</body>
+
+</html>
